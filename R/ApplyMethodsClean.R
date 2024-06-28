@@ -33,133 +33,14 @@ library(logisticRR)
 
 #Mechanical functions (hidden)######
 #x is numeric
-check_integer = function(x){
-  check = all.equal(x, as.integer(x))
-  return(isTRUE(check))
-}
+
 set_p = function(p,model){
   p2 = log(p/(1-p))
   b0 = p2-model
   return(b0)
 }
-tot_bind <- function(datalist) {
-  require(plyr)
-  temp = rbind.fill(datalist)
-  rownames(temp) <- unlist(lapply(datalist, row.names))
-  return(temp)
-}
 
 
-beta_sum = function(run, a=0.05){
-
-
-  #call needed data
-  ate = run[[9]][2]
-  calc_ate = as.data.frame(run[[2]])
-  lower_int = as.data.frame(run[[3]])
-  upper_int = as.data.frame(run[[4]])
-  p_val = as.data.frame(run[[5]])
-  n=length(calc_ate[[1]])
-
-  #parse data
-  names= unlist(lapply(colnames(lower_int), function(y) rep(y, nrow(lower_int))))
-  upper_int= as.numeric(unlist(upper_int))
-  lower_int = as.numeric(unlist(lower_int))
-  calc_ate = as.numeric(unlist(calc_ate))
-  p_val = as.numeric(unlist(p_val))
-  data=tibble(names,lower_int, upper_int, calc_ate, p_val)
-  data_ci = data %>% filter(lower_int <= ate & upper_int >= ate)
-  data_under_ci = data %>% filter(upper_int < ate)
-  data_over_ci = data %>% filter(lower_int > ate)
-  data_ci$in_ci = 1
-  data_under_ci$in_ci = 0
-  data_over_ci$in_ci = 0
-  data_ci$over_ci = 0
-  data_ci$under_ci = 0
-  data_under_ci$over_ci = 0
-  data_over_ci$over_ci = 1
-  data_under_ci$under_ci = 1
-  data_over_ci$under_ci = 0
-
-  data_under_a = data %>% filter(p_val <= a)
-
-  data = rbind(data_ci, data_over_ci, data_under_ci)
-  #max((data_ci %>% filter(names == "logistic_or"))[4])
-
-  #create summary functions
-  max_ci_beta = sapply(unique(data$names), function(x) max((data_ci %>% filter(names == x))[4]))
-  min_ci_beta = sapply(unique(data$names), function(x) min((data_ci %>% filter(names == x))[4]))
-  max_beta = sapply(unique(data$names), function(x) max((data %>% filter(names == x))[4]))
-  min_beta = sapply(unique(data$names), function(x) min((data %>% filter(names == x))[4]))
-  mean_beta = sapply(as.list(unique(data$names)), function(x) mean((data %>% filter(names == x))[[4]]))
-  names(mean_beta) = colnames(run[[2]])
-  sd_beta = sapply(as.list(unique(data$names)), function(x) sd((data %>% filter(names == x))[[4]]))
-  prop_over_ci = sapply(unique(data$names), function(x) length((data_over_ci %>% filter(names == x))[[4]])/length(run[[1]][,1]))
-  prop_under_ci = sapply(unique(data$names), function(x) length((data_under_ci %>% filter(names == x))[[4]])/length(run[[1]][,1]))
-
-  beta_se =  sapply(as.list(unique(data$names)), function(x) sd((data %>% filter(names == x))[[4]])/sqrt(n))
-  beta_bias = mean_beta-ate
-  #emp_se = sapply(unique(data$names), function(x) sqrt(1/(n-1) * ( sum(((data %>% filter(names == x))[4] - mean((data %>% filter(names == x))[[4]]) )^2))) )
-  #beta_mse = sapply(unique(data$names), function(x) (1/n) * ( sum(((data %>% filter(names == x))[4] - ate )^2)) )
-  #names(beta_mse) = colnames(run[[2]])
-
-  #model_se = sqrt(beta_mse)
-  #model_se = sapply(unique(data$names), function(x) sqrt(1/(n-1) * ( sum(((data %>% filter(names == x))[4] - mean((data %>% filter(names == x))[[4]]) )^2) )) )
-  #names(model_se) = colnames(run[[2]])
-  #rel_model_error = (model_se/emp_se - 1)*100
-  reject_per = sapply(unique(data$names), function(x) length((data_under_a %>% filter(names == x))[[4]])/n)
-  coverage = 1-(prop_over_ci+prop_under_ci)
-
-  #MCMC std error of functions
-  beta_bias_mcse =sapply(as.list(unique(data$names)), function(x) sqrt(sum(((data %>% filter(names == x))[[4]]-mean_beta[[x]])^2) * 1/(n*(n-1))) )
-  #emp_se_mcse = emp_se/(sqrt(2*(n-1)))
-  #beta_mse_mcse = sapply(as.list(unique(data$names)), function(x) sqrt(sum((((data %>% filter(names == x))[[4]]-ate)^2 - beta_mse[[x]])^2) / (n*(n-1))) )
-  #model_se_mcse = sapply(as.list(unique(data$names)), function(x) sqrt( ((1/(n-1)) * sum( (var((data %>% filter(names == x))[[4]])  - sum(var((data %>% filter(names == x))[[4]])*(1/n)))^2 )) / (4*n*model_se[[x]]^2) ) )
-  #rel_model_error_mcse = sapply(as.list(unique(data$names)), function(x)  100*(model_se[[x]]/emp_se[[x]]) * sqrt( ((1/(n-1)) * sum( (var((data %>% filter(names == x))[[4]])  - sum(var((data %>% filter(names == x))[[4]])*(1/n)))^2 )) / (4*n*model_se[[x]]^2) + (1/(2*(n-1))) ) )
-  coverage_mcse = sqrt((coverage*(1-coverage))/n)
-  reject_per_mcse = sqrt((reject_per*(1-reject_per))/n)
-
-  #amalgamte into model
-  beta_in_ci = as.data.frame(rbind(max_ci_beta, min_ci_beta, max_beta, min_beta, mean_beta, sd_beta, prop_over_ci, prop_under_ci,
-                                   beta_se, beta_bias, reject_per, coverage,
-                                   beta_bias_mcse, reject_per_mcse, coverage_mcse)
-  )
-  beta_in_ci[sapply(beta_in_ci, is.infinite)]=NA
-  beta_in_ci = beta_in_ci[,c(colnames(run[[1]]))] #reorder columns to original run order for indexing
-  return(beta_in_ci)
-}
-
-beta_summary = function(run, a = 0.05){
-  the_table = suppressWarnings(beta_sum(run,a))
-  the_table[c(7,8,11,12,14,15),] = the_table[c(7,8,11,12,14,15),]*100
-  the_table = the_table[c(5:8, 10:15),]
-  the_table = t(the_table)
-  the_table = as.data.frame(the_table)
-  the_table = the_table[,c(5,8,7,10,6,9,1,2,4,3)]
-  colnames(the_table) = c("bias", "bias_se", "coverage", "coverage_se", "rejection_rate", "rejection_rate_se",
-                          "mean_b_estimate", "b_estimate_std_dev", "b_under_ci", "b_over_ci")
-
-  return(the_table)
-}
-#####
-#make_model now as flexible argument lengths, DAGs must be functions, will be internal cleaning function
-
-#hidden also
-make_model = function(dag, ...){
-  arg_list = list(...)
-  if(class(dag)== "HydeNetwork"){
-    dag_1 = dag
-  }else if(length(arg_list)==0){
-    dag_1 = dag()
-
-  }else{
-    dag_1 = do.call(dag, arg_list)
-  }
-
-  writeNetworkModel(dag_1, pretty = TRUE)
-  comp_dag = compileJagsModel(dag_1)
-  return(comp_dag)
-}
 
 #hidden?
 misdiagnosis = function(df, variable, under_rate=0, over_rate=0){
@@ -331,35 +212,6 @@ dichotomize = function(column, df, div){
 
 #example create_data(iges_demo, 10000, further arguements)
 
-#'Create simulated data from a defined directed acyclic graph
-#'
-#' @param dag Hydenet directed acyclic graph object (DAG object)
-#'
-#' @param n Integer, the number of samples in the simulated dataset
-#'
-#' @param ... if variables are written into the DAG object, they can be numerically set here.
-#' This allows the user to quickly change DAG values when generating simulated data
-#'
-#' @param reclassify Binary variables will be returned as either a 0 or 1 integer by default.
-#' If the user wishes them to be a different class, they may set that here.
-#'
-#' @return This function returns a simulated data frame. Each column in the data frame corresponds to a node
-#' in the DAG object. The data frame will have n rows. Nodes with continuous distributions will have a
-#' double class, and nodes with binary distributions will have the class set in the reclassify
-#' parameter, with integer as the defalut class.
-#'
-#'@examples
-#'
-create_data = function(dag, n, ..., reclassify = as.integer){
-  jag_dag = make_model(dag, ...)
-  sim_df = bindSim(HydeSim(jag_dag, variable.names = colnames(jag_dag$dag), n.iter = n, bind = FALSE))
-  relabel = lapply(sim_df, check_integer) # JAGS labels integers as numeric, have to reclassify them
-  relabel = relabel[relabel != FALSE]
-  relabel = names(relabel)
-  sim_df[relabel] = lapply(sim_df[relabel], reclassify)
-  sim_df = sim_df[c(-length(sim_df), -(length(sim_df)-1))]
-  return(sim_df)
-}
 apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, x=5, div=4, ratio=1, match_methods = NULL){
 
   #create empty data frame
@@ -550,6 +402,8 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
                   set_ate = partition[,, 10],
                   over_r = partition[,,11],
                   under_r = partition[,,12])
+  class(run_list) = "ScenarioMatrix"
+
 
   return(run_list)
 }
@@ -773,37 +627,7 @@ ci_ridges = function(run, title =NULL, subtitle=NULL){
   return(grid.draw(g))
 
 }
-summary_table = function(run){
-  myt <- ttheme_default(
-    rowhead = list(fg_params=list(cex = 1.0, fontface = "bold"), bg_params=list(fill="gray80", col = "black")),
-    colhead = list(bg_params = list(col = "black")),
-    core = list(bg_params = list(fill = "white", col = "black"))
-  )
 
-  the_table = beta_summary(run, show_se =T)
-  out_vals = the_table[c(1,13,14,15,16)]
-  se_vals = the_table[c(2,4,12)]
-  r_var = 4
-  bias_upper = round(out_vals$bias + se_vals$se_bias, r_var)
-  bias_lower = round(out_vals$bias - se_vals$se_bias, r_var)
-  bias_char = paste0(round(out_vals$bias, r_var), " (",bias_lower, ", ", bias_upper, ")" )
-
-  out_vals = round(out_vals,4)
-  out_vals$bias = bias_char
-  colnames(out_vals) = c("bias (-SE, +SE)", "B estimate mean", "B estimate sd", "% estimate over 95% CI", "% estimate under 95% CI")
-
-  rows = rownames(out_vals)
-  rownames(out_vals) = sapply(rows, function(x) paste(strwrap(x, width = 20),  collapse="\n"))
-  cols = colnames(out_vals)
-  colnames(out_vals) = sapply(cols, function(x) paste(strwrap(x, width = 16),  collapse="\n"))
-
-  g5 <- tableGrob(out_vals, theme = myt)
-  #g5$widths <- unit(rep(1/ncol(g5), ncol(g5)), "npc")
-
-  grid.newpage()
-
-  return(grid.draw(g5))
-}
 #####
 
 
