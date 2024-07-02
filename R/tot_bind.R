@@ -1,4 +1,4 @@
-#'@noRD
+#'@noRd
 
 tot_bind <- function(datalist) {
   require(plyr)
