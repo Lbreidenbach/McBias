@@ -1,12 +1,15 @@
-#' Gives the total bias, null rejection rate, coverage, and effect size mean and standard deviation
-#' @param run a ScenarioMatrix object as returned by varied_runs()
-#' @param a The alpha value for calculating the null rejection rate, defaults to 0.05
-#' @returns A data frame with the following summary statistics from a simulation:
+#' Returns the total bias, null rejection rate, coverage, and effect size mean and standard deviation
+#'
+#' Specifically beta_summary returns:
 #' * Total bias: the average effect size estimate - the set effect size. Also returns its standard error
 #' * Null rejection rate: the percentage of p values that were less than the set alpha value. Also returns its standard error
 #' * Coverage: the percent of effect size estimates that contained the set effect size in its 95% confidence interval. Also returns its standard error
 #' * The mean effect size estimate
 #' * The standard deviation of the effect size estimate
+#'
+#' @param run a ScenarioMatrix object as returned by varied_runs()
+#' @param a The alpha value for calculating the null rejection rate, defaults to 0.05
+#' @returns A data frame with the following summary statistics listed above
 #' @example McBias/examples/Dag_example.R
 #' @seealso [varied_runs()], [ci_ridges()]
 #' @export

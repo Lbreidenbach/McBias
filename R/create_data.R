@@ -1,9 +1,10 @@
 
-#'Create simulated data from a defined directed acyclic graph
+#'Create simulated data from a DAG object
 #'
-#' @param dag Hydenet directed acyclic graph object (DAG object)
+#'Creates a single data frame of a set sample size from a DAG object with set distributions
+#' @param dag Hydenet directed acyclic graph object (DAG object) with set distributions for each node.
 #'
-#' @param n Integer, the number of samples in the simulated dataset
+#' @param n Integer, the number of samples in the simulated data frame
 #'
 #' @param ... if variables are written into the DAG object, they must all be numerically set here.
 #' This allows the user to quickly change DAG values when generating simulated data
@@ -11,9 +12,9 @@
 #' @return This function returns a simulated data frame. Each column in the data frame corresponds to a node
 #' in the DAG object. The data frame will have n rows. Nodes with continuous distributions will have a
 #' double class, and nodes with binary distributions will have an integer class.
-#'
+#'@seealso [Hydenet::HydeNetwork()],[Hydenet::setNode()]
 #'@examples McBias/examples/make_model_create_data.R
-#'@seealso [make_model()]
+
 #'@export
 #'
 create_data = function(dag, n, ...){

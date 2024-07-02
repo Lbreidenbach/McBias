@@ -1,4 +1,4 @@
-#'@noRD
+#'@noRd
 
 beta_sum = function(run, a=0.05){
   require(dplyr)
