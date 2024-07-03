@@ -13,7 +13,7 @@
 #' in the DAG object. The data frame will have n rows. Nodes with continuous distributions will have a
 #' double class, and nodes with binary distributions will have an integer class.
 #'@seealso [Hydenet::HydeNetwork()],[Hydenet::setNode()]
-#'@examples McBias/examples/make_model_create_data.R
+#'@examples McBias/examples/create_data_example.R
 
 #'@export
 #'
