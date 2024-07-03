@@ -20,7 +20,7 @@
 #' * number of samples in the dataset
 #'
 #'@examples
-#'@seealso [varied_runs()]
+#'@seealso [varied_runs()],[apply_methods()]
 #'@export
 #'
 

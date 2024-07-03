@@ -10,6 +10,8 @@ confounder_dag = setNode(my_dag, D, nodeType = "dbern", prob = paste0("ilogit(",
 #create data creates a single dataset.
 #This lets users see if the simulated datasets behave as expected before committing to a large simulation with many iterations
 
-sim_data = create_data(confounder_dag, 100000)
+sim_data = create_data(confounder_dag, 10000)
 
 or_result = odds_ratio(exposure = "A", outcome = "D", covariates = c("B","C"), df = sim_data)
+rr_result = risk_ratio(exposure = "A", outcome = "D", covariates = c("B","C"), df = sim_data)
+
