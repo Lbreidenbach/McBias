@@ -14,8 +14,8 @@
 #' @return A six column data frame with the following summary statistics:
 #' * odds ratio
 #' * beta (log odds)
-#' * lower 95% confidence interval
-#' * upper 95% confidence interval
+#' * lower 95% confidence interval of beta coefficient
+#' * upper 95% confidence interval of beta coefficient
 #' * p value
 #' * number of samples in the dataset
 #'
