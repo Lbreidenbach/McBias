@@ -12,7 +12,7 @@
 #' @return The original data frame with an additional propensity score column and an additional propensity score weight column
 #'
 #'@examples McBias/examples/propensity_score_df.R
-#'@seealso [varied_runs()]
+#'@seealso [varied_runs()], [applied_methods()]
 #'@export
 #'
 
