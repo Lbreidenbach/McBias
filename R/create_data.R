@@ -6,6 +6,8 @@
 #'
 #' @param n Integer, the number of samples in the simulated data frame
 #'
+#' @param positivity logical. If set to TRUE, checks for positivity violations among binary columns. If violated, it changes the value in the first row of the column to comply with positivity. Defaults to FALSE.
+#'
 #' @param ... if variables are written into the DAG object, they must all be numerically set here.
 #' This allows the user to quickly change DAG values when generating simulated data
 #'
@@ -37,7 +39,9 @@ create_data = function(dag, n, positivity = F, ...){
     bi_sim[1, all_1s]=0
     all_0s = names(which(pos_check==0))
     bi_sim[1, all_0s]=1
-
+    names_order = colnames(sim_df)
+    sim_df = cbind(bi_sim, cont_sim)
+    sim_df = sim_df[,names_order]
   }
 
   return(sim_df)
