@@ -17,7 +17,7 @@
 
 #'@export
 #'
-create_data = function(dag, n, ...){
+create_data = function(dag, n, positivity = F, ...){
   require(HydeNet)
   reclassify = as.integer
   jag_dag = make_model(dag, ...)
@@ -27,5 +27,18 @@ create_data = function(dag, n, ...){
   relabel = names(relabel)
   sim_df[relabel] = lapply(sim_df[relabel], reclassify)
   sim_df = sim_df[c(-length(sim_df), -(length(sim_df)-1))]
+  if(positivity==T){
+    binary_cols = names(which(lapply(sim_df, is.integer)==TRUE))
+    cont_cols = names(which(lapply(sim_df, is.integer)==FALSE))
+    bi_sim = sim_df[binary_cols]
+    cont_sim = sim_df[cont_cols]
+    pos_check = lapply(bi_sim, function(x) sum(x)/length(x))
+    all_1s = names(which(pos_check==1))
+    bi_sim[1, all_1s]=0
+    all_0s = names(which(pos_check==0))
+    bi_sim[1, all_0s]=1
+
+  }
+
   return(sim_df)
 }
