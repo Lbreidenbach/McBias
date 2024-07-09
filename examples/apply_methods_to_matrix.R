@@ -40,4 +40,7 @@ gaussian_outcome_result
 matching_results = apply_methods(exposure = "C", outcome = "B", covariates = "A", df = sim_data, ratio = 2, match_methods = c("logit", "Mahalanobis"))
 matching_results
 
+#if a continuous exposure is fed into matching methods, the exposure will be dichotimized and a warning will be issued
 
+gaussian_exposure_results = apply_methods(exposure = "B", outcome = "A", covariates = "A", df = sim_data, ratio = 2, match_methods = c("logit", "Mahalanobis"))
+gaussian_exposure_results
