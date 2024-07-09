@@ -9,7 +9,7 @@
 #'
 #' @param covariates Character value/vector. The name(s) of the columns that the user wants adjust on. Defaults to NULL meaning no covariates are adjusted on.
 #'
-#' @param sb Character value/vector. The name(s) of \strong{binary} column(s). Stratifies the data frame
+#' @param sb Character value/vector. The name(s) of \strong{binary} column(s). Stratifies the data frame to include only the rows with 1s in every listed column.
 #'
 #' @param df The data frame for analysis
 #'
