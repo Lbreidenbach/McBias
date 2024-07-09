@@ -40,7 +40,7 @@
 #'
 
 
-varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n=10000, misdiagnosis_v = outcome, under_r = 0, over_r = 0, ratio=1, match_methods = NULL, ...){
+varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n=10000, positivity = F, misdiagnosis_v = outcome, under_r = 0, over_r = 0, ratio=1, match_methods = NULL, ...){
   randomize = function(variable, rmodel){
     if(is.null(variable) == TRUE){
       variable = rmodel
@@ -80,7 +80,7 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
 
 
   #temp_dag = lapply(c(1:runs), function(x) make_model(dag, value_df[x,1], value_df[x,3], value_df[x,4]))
-  temp_df = lapply(c(1:runs), function(x) create_data(dag, as.numeric(value_df[x,1]), ...))
+  temp_df = lapply(c(1:runs), function(x) create_data(dag, as.numeric(value_df[x,1]), positivity = positivity, ...))
   temp_df = lapply(c(1:runs), function(x) misdiagnosis(temp_df[[x]], misdiagnosis_v, under_r[x], over_r[x]))
   temp_output = lapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods)
 
