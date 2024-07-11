@@ -29,7 +29,7 @@ odds_ratio = function(exposure, outcome, covariates=NULL, df){
   cont_glm = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, family = "binomial")
   exp_coef = as.numeric(cont_glm$coefficients[2])
   exp_or = exp(exp_coef)
-  or_confint = stats::confint.default(cont_glm, trace = F)
+  or_confint = stats::confint(cont_glm, parm = outcome, trace = F)
   or_upper = or_confint[2,2]
   or_lower = or_confint[2,1]
   int_diff = or_upper - or_lower
