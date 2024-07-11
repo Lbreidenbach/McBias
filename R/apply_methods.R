@@ -68,12 +68,12 @@ apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=
 
   #risk_ratio_quals
   if(class(df[,outcome])=="integer" & length(find.package("logisticRR", quiet=TRUE))==1){
-    tot_df = tot_bind(list(tot_df, risk_ratio(exposure, outcome, df = df)))
+    tot_df = tot_bind(list(tot_df, risk_ratio(exposure, outcome, covariates, df = df)))
   }
 
   #odds ratio quals
   if(class(df[,outcome])=="integer"){
-    tot_df = tot_bind(list(tot_df, odds_ratio(exposure, outcome, df = df)))
+    tot_df = tot_bind(list(tot_df, odds_ratio(exposure, outcome, covariates, df = df)))
   }
 
   #lm beta quals
@@ -102,8 +102,15 @@ apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=
     }
 
     match_df_list = lapply(match_methods, function(x) matchit_matching(exposure, covariates, di_df, d = x, ratio))
-    match_dfs = tot_bind(lapply(c(1:length(match_df_list)), function(x) re(lm_beta(exposure, outcome, df = match_df_list[[x]]), match_methods[[x]])
-    ))
+    if(class(df[,outcome]) == "numeric"){
+      match_dfs = tot_bind(lapply(c(1:length(match_df_list)), function(x) re(lm_beta(exposure, outcome, df = match_df_list[[x]]), match_methods[[x]])
+      ))
+    }
+    if(class(df[,outcome]) == "integer"){
+      match_dfs = tot_bind(lapply(c(1:length(match_df_list)), function(x) re(odds_ratio(exposure, outcome, df = match_df_list[[x]]), match_methods[[x]])
+      ))
+    }
+
     tot_df = tot_bind(list(tot_df,match_dfs))
   }
 
