@@ -67,9 +67,9 @@ apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=
   #rewriting for less if/else conditions
 
   #risk_ratio_quals
-  if(class(df[,outcome])=="integer" & length(find.package("logisticRR", quiet=TRUE))==1){
-    tot_df = tot_bind(list(tot_df, risk_ratio(exposure, outcome, covariates, df = df)))
-  }
+  # if(class(df[,outcome])=="integer" & length(find.package("logisticRR", quiet=TRUE))==1){
+  #   tot_df = tot_bind(list(tot_df, risk_ratio(exposure, outcome, covariates, df = df)))
+  # }
 
   #odds ratio quals
   if(class(df[,outcome])=="integer"){
