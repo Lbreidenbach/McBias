@@ -24,16 +24,15 @@
 #'@export
 #'
 
-
 risk_ratio = function(exposure, outcome, covariates=NULL, df){
   require(logisticRR)
   vars = c(exposure, covariates)
   cont_glm = logisticRR::logisticRR(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df)
   exp_coef = cont_glm$fit$coefficients[[2]]
   exp_rr = cont_glm$RR
-  or_confint = confint.default(cont_glm$fit, trace = F)
-  or_upper = or_confint[2,2]
-  or_lower = or_confint[2,1]
+  or_confint = confint.default(cont_glm$fit, parm = exposure, trace = F)
+  or_upper = or_confint[1,2]
+  or_lower = or_confint[1,1]
   int_diff = or_upper - or_lower
 
   or_df = data.frame("odds_ratio" = exp_rr,
@@ -46,6 +45,4 @@ risk_ratio = function(exposure, outcome, covariates=NULL, df){
   row.names(or_df) = "rr_regression"
   return(or_df)
 }
-
-
 
