@@ -28,16 +28,20 @@
 #'
 #' @param ... If the DAG has any unset variables, define them here
 #'
-#' @return A six column data frame of n rows where n is the number of different methods run. The columns represent the following summary statistics:
-#' * odds ratio
-#' * beta (log odds)
-#' * lower 95% confidence interval of beta coefficient
-#' * upper 95% confidence interval of beta coefficient
-#' * p value
-#' * number of samples in the dataset
-#'
-#'@examples McBias/examples/apply_methods_to_matrix.R
-#'@seealso [apply_methods()],[ci_ridges()],[beta_summary()]
+#' @return A list of 11 elements with each element bulleted below in order
+#' * odds_ratio, NA if not applicable to the method used
+#' * calculated_ate, the calculated effect size estimate between the set exposure and outcome
+#' * lower_int, the lower bound of the 95% confidence interval for the calculated_ate
+#' * upper_int, the upper bound of the 95% confidence interval for the calculated_ate
+#' * p_values, the p value for the calculated_ate
+#' * exp_prevalence, the exposure prevalence if the exposure variable is binary, returns NAs if not
+#' * out_prevalence, the outcome prevalence if the outcome variable is binary, returns NAs if not
+#' * sample_population, the number of samples in the dataset. If the analysis requires stratifying or throwing data samples, sample_population will change to reflect that.
+#' * set_ate, the effect size between the exposure and outcome that is directly set in the DAG object. Acts as the true effect size.
+#' * over_r, the overdiagnosis rate that was set. defaults to 0
+#' * under_r, the overdiagnosis rate that was set. defaults to 0
+#'@examples McBias/examples/varied_methods_example.R
+#'@seealso [apply_methods()],[ci_ridges()],[beta_summary()], [reparse_runs()]
 #'@export
 #'
 
