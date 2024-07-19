@@ -4,6 +4,8 @@
 #'
 #' @param runs The number of data frames to be simulated
 #'
+#' @param dag Hydenet directed acyclic graph object (DAG object) with set distributions for each node.
+#'
 #' @param exposure Character value. The column name in a data frame that represents exposure in an
 #'
 #' @param outcome Character value. The column name in a data frame that represents the outcome.
@@ -59,30 +61,30 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
   #capture the set ate
   temp_dag = make_model(dag, ...)
   ate_set = temp_dag$dag[exposure, outcome]
-  if(ate_set == 0){
-    ate = 0
-  }else{
-    b_value = capture.output(temp_dag$jags)
-    outcome_eq = grep(paste0("   ", outcome), b_value, value = T)
-    outcome_eq = gsub(" ", "", outcome_eq, fixed = T)
-    outcome_eq = unlist(strsplit(outcome_eq, ")", fixed = T))
-    outcome_eq = unlist(strsplit(outcome_eq, "(", fixed = T))
-    outcome_eq = unlist(strsplit(outcome_eq, "+", fixed = T))
-    outcome_val = grep(exposure, outcome_eq, value = T)
-    outcome_val = gsub(exposure, 1, outcome_val)
-    outcome_val = gsub("[[:alpha:]]", "0", outcome_val)
-    ate = sum(unlist(lapply(outcome_val, function(x) eval(parse(text = x)))))
-    #outcome_val = eval(parse(text = ))
-
-
-    #FIX FINDING ATE
-  }
+  b_value = capture.output(temp_dag$jags)
+  outcome_eq = grep(paste0("   ", outcome), b_value, value = T)
+  outcome_eq = gsub(" ", "", outcome_eq, fixed = T)
+  outcome_eq = unlist(strsplit(outcome_eq, ")", fixed = T))
+  outcome_eq = unlist(strsplit(outcome_eq, "(", fixed = T))
+  outcome_eq = unlist(strsplit(outcome_eq, "+", fixed = T))
+  outcome_val = grep(exposure, outcome_eq, value = T)
+  outcome_val = gsub(exposure, 1, outcome_val)
+  outcome_val = gsub("[[:alpha:]]", "0", outcome_val)
+  ate = sum(unlist(lapply(outcome_val, function(x) eval(parse(text = x)))))
 
 
   #temp_dag = lapply(c(1:runs), function(x) make_model(dag, value_df[x,1], value_df[x,3], value_df[x,4]))
-  temp_df = lapply(c(1:runs), function(x) create_data(dag, as.numeric(value_df[x,1]), positivity = positivity, ...))
+
+  #FIX DIMENSION PROBLEM
+  temp_df = lapply(c(1:runs), function(x) create_data(dag, value_df[x,1], positivity = positivity, ...))
   temp_df = lapply(c(1:runs), function(x) misdiagnosis(temp_df[[x]], misdiagnosis_v, under_r[x], over_r[x]))
   temp_output = lapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods)
+
+  one_dim = FALSE
+  if(names(temp_output[[1]])[1]=="apply(tot_df, 2, unlist)"){
+    temp_output = lapply(1:runs,function(x) t(temp_output[[x]]))
+    one_dim = TRUE
+  }
 
   if(class(temp_df[[1]][,outcome])=="integer"){
     out_p = unlist(lapply(c(1:runs), function(x) sum(temp_df[[x]][,outcome])/nrow(temp_df[[x]])))
@@ -106,20 +108,21 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
   temp_output =lapply(c(1:runs), function(x) cbind(temp_output[[x]], over_r = rep(over_r[x], nrow(temp_output[[x]]))))
   temp_output =lapply(c(1:runs), function(x) cbind(temp_output[[x]], under_r = rep(under_r[x], nrow(temp_output[[x]]))))
   partition = laply(temp_output, as.matrix)
-  if(is.null(covariates)==T & class(temp_df[[1]][,outcome])=="numeric"){
-    # partition = list(data.frame(odds_ratio = NA),
-    #                  data.frame(calculated_ate = partition[, 2]),
-    #                  data.frame(lower_int = partition[, 3]),
-    #                  data.frame(upper_int = partition[, 4]),
-    #                  data.frame(p_values = partition[, 6]),
-    #                  data.frame(exp_prevalence = partition[, 8]),
-    #                  data.frame(out_prevalence = partition[, 9]),
-    #                  data.frame(sample_population = partition[, 7]),
-    #                  data.frame(set_ate = partition[, 10]),
-    #                  data.frame(over_r = partition[,11]),
-    #                  data.frame(under_r = partition[,12]))
+  if(one_dim == TRUE){
+    partition = list(odds_ratio = partition[, 1],
+                     calculated_ate = partition[, 2],
+                     lower_int = partition[, 3],
+                     upper_int = partition[, 4],
+                     p_values = partition[, 6],
+                     exp_prevalence = partition[, 8],
+                     out_prevalence = partition[, 9],
+                     sample_population = partition[, 7],
+                     set_ate = partition[, 10],
+                     over_r = partition[,11],
+                     under_r = partition[,12])
     # partition = as.matrix(partition)
-    return(partition[,-5])
+    # class(partition) = c("ScenarioMatrix", "matrix")
+    return(partition)
   }
   run_list = list(ratio = partition[,, 1],
                   calculated_ate = partition[,, 2],
@@ -132,7 +135,7 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
                   set_ate = partition[,, 10],
                   over_r = partition[,,11],
                   under_r = partition[,,12])
-  class(run_list) = "ScenarioMatrix"
+  # class(run_list) = "ScenarioMatrix"
 
 
   return(run_list)
