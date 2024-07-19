@@ -27,9 +27,9 @@
 lm_beta = function(exposure, outcome, covariates=NULL, df){
   vars = c(exposure, covariates)
   lm1 = stats::lm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df)
-  confint = confint(lm1, trace = F)
-  upper_int = confint[2,2]
-  lower_int = confint[2,1]
+  confint = confint(lm1, parm = exposure, trace = F)
+  upper_int = confint[1,2]
+  lower_int = confint[1,1]
   beta = as.numeric(lm1$coefficients[2])
   regression_df = data.frame("odds_ratio" = NA,
                              beta = beta,
@@ -38,6 +38,7 @@ lm_beta = function(exposure, outcome, covariates=NULL, df){
                              confint_diff = abs(upper_int-lower_int),
                              p_val = coef(summary(lm1))[2,4],
                              n = nrow(df))
+
   rownames(regression_df) = "linear_regression"
   return(regression_df)
 }

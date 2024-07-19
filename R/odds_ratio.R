@@ -26,12 +26,14 @@
 
 odds_ratio = function(exposure, outcome, covariates=NULL, df){
   vars = c(exposure, covariates)
-  cont_glm = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, family = "binomial")
+  cont_glm = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, family = "quasibinomial")
   exp_coef = as.numeric(cont_glm$coefficients[2])
   exp_or = exp(exp_coef)
-  or_confint = stats::confint.default(cont_glm, trace = F)
-  or_upper = or_confint[2,2]
-  or_lower = or_confint[2,1]
+  or_confint = stats::confint.default(cont_glm, parm = exposure, trace = F)
+
+  or_upper = or_confint[1,2]
+  or_lower = or_confint[1,1]
+
   int_diff = or_upper - or_lower
 
   or_df = data.frame("odds_ratio" = exp_or,
@@ -41,7 +43,9 @@ odds_ratio = function(exposure, outcome, covariates=NULL, df){
                      confint_diff = abs(int_diff),
                      p_val = coef(summary(cont_glm))[2,4],
                      n = nrow(df))
-  row.names(or_df) = "logistic_or"
+
+
+  row.names(or_df) = "logistic_regression"
   return(or_df)
 }
 

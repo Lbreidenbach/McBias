@@ -39,9 +39,9 @@ ps_weight = function(exposure, outcome, covariates, df, weights){
 
   exp_coef = as.numeric(cont_glm$coefficients[2])
   exp_or = exp(exp_coef)
-  or_confint = stats::confint.default(cont_glm, trace = F)
-  or_upper = or_confint[2,2]
-  or_lower = or_confint[2,1]
+  or_confint = stats::confint.default(cont_glm, parm = exposure, trace = F)
+  or_upper = or_confint[1,2]
+  or_lower = or_confint[1,1]
   int_diff = or_upper - or_lower
   if(class(df[,outcome]) == "numeric" ){
     exp_or = NA
@@ -58,3 +58,5 @@ ps_weight = function(exposure, outcome, covariates, df, weights){
   row.names(or_df) = "ps_weighting"
   return(or_df)
 }
+
+
