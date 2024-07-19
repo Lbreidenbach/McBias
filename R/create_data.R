@@ -16,9 +16,9 @@
 #' double class, and nodes with binary distributions will have an integer class.
 #'@seealso [Hydenet::HydeNetwork()],[Hydenet::setNode()]
 #'@examples McBias/examples/create_data_example.R
-
 #'@export
 #'
+
 create_data = function(dag, n, positivity = F, ...){
   require(HydeNet)
   reclassify = as.integer
@@ -29,6 +29,10 @@ create_data = function(dag, n, positivity = F, ...){
   relabel = names(relabel)
   sim_df[relabel] = lapply(sim_df[relabel], reclassify)
   sim_df = sim_df[c(-length(sim_df), -(length(sim_df)-1))]
+  sep_check = length(which(duplicated(t(sim_df)==TRUE)))
+  if(sep_check != 0){
+    stop("complete separation occured (one variable completly predicts another). A beta value may be too large, or a sample size may be too small")
+  }
   if(positivity==T){
     binary_cols = names(which(lapply(sim_df, is.integer)==TRUE))
     cont_cols = names(which(lapply(sim_df, is.integer)==FALSE))
@@ -46,3 +50,5 @@ create_data = function(dag, n, positivity = F, ...){
 
   return(sim_df)
 }
+
+
