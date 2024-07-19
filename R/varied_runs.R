@@ -1,6 +1,6 @@
-#'creates a matrix of summary statistics for methods testing and bias quantification
+#'Creates a list of summary statistics for methods testing and bias quantification
 #'
-#'creates a number of data frames (set by runs) and analyzes them with the methods offered in apply_methods().
+#'Creates a set number of simulated data frames and analyzes them with the methods offered in apply_methods(). Returns a list of summary statistics from each analysis
 #'
 #' @param runs The number of data frames to be simulated
 #'
@@ -40,6 +40,9 @@
 #' * set_ate, the effect size between the exposure and outcome that is directly set in the DAG object. Acts as the true effect size.
 #' * over_r, the overdiagnosis rate that was set. defaults to 0
 #' * under_r, the overdiagnosis rate that was set. defaults to 0
+#'
+#' each list element will contain x number of columns and y number of rows, where x is the number of different methods tested, and y is the number of simulated data sets created.
+#'
 #'@examples McBias/examples/varied_methods_example.R
 #'@seealso [apply_methods()],[ci_ridges()],[beta_summary()], [reparse_runs()]
 #'@export
