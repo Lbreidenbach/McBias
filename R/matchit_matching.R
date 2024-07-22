@@ -15,7 +15,7 @@
 #'
 #' @return A data frame where each case from the exposure column is matched to a set number of controls based on the named covariates.
 #'
-#'@examples McBias/examples/MatchIt_example.R
+#'@examples examples/MatchIt_example.R
 #'@seealso [varied_runs()]
 #'@export
 #'

@@ -24,7 +24,7 @@
 #'
 #' each list element will contain x number of columns and y number of rows, where x is the number of different methods tested, and y is the number of simulated data sets created.
 #'
-#'@examples McBias/examples/varied_methods_example.R
+#'@examples examples/varied_methods_example.R
 #'@seealso [apply_methods()],[ci_ridges()],[beta_summary()], [varied_runs()]
 #'@export
 #'

@@ -3,14 +3,14 @@
 #' Each ridgeline plots out the calculated effect size for each method in the output. The set effect size appears as a dashed line through the ridgeline so the user can see how close the calculated
 #' estimates are. If the calculated effect size contains the true effect size in it's 95% confidence intervals, it is shaded blue, otherwise it is shaded grey. This allows users to visualize a simulations coverage.
 #'
-#' @param run a  list object as returned by varied_runs() or reparse_runs()
+#' @param run a list object as returned by varied_runs() or reparse_runs()
 #'
 #' @param title The title of the ggridges plot.
 #'
 #' @param subtitle The subtitle of the ggridges plot
 #'
 #' @returns A ggridges plot
-#' @example McBias/examples/varied_methods_example.R
+#' @example examples/varied_methods_example.R
 #' @seealso [varied_runs()], [reparse_runs()]
 #' @export
 

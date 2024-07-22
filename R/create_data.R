@@ -14,13 +14,11 @@
 #' @return This function returns a simulated data frame. Each column in the data frame corresponds to a node
 #' in the DAG object. The data frame will have n rows. Nodes with continuous distributions will have a
 #' double class, and nodes with binary distributions will have an integer class.
-#'@seealso [Hydenet::HydeNetwork()],[Hydenet::setNode()]
-#'@examples McBias/examples/create_data_example.R
+#'@examples examples/create_data_example.R
 #'@export
 #'
 
 create_data = function(dag, n, positivity = F, ...){
-  require(HydeNet)
   reclassify = as.integer
   jag_dag = make_model(dag, ...)
   sim_df = HydeNet::bindSim(HydeNet::HydeSim(jag_dag, variable.names = colnames(jag_dag$dag), n.iter = n, bind = FALSE))

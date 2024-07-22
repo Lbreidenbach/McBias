@@ -12,7 +12,7 @@
 #'
 #' @return A data frame with the values of the specifed column changed as set by the user
 #'
-#'@examples McBias/examples/misdiagnosis_example.R
+#'@examples examples/misdiagnosis_example.R
 #'@seealso [varied_runs()]
 #'@export
 #'

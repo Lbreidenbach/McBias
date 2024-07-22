@@ -1,7 +1,6 @@
 #' A hydenet object with the set distributions shown in the paper use case
 #'
-#' A dataset containing the prices and other attributes of almost 54,000
-#'  diamonds. The variables are as follows:
+#' A DAG object that represents a predictive model of type 2 diabetes development and development of conditions related to type 2 diabetes.
 #'
 #' @format A HydeNetwork with 7 nodes and set node distributions
 #' \describe{

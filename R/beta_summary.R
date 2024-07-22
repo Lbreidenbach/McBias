@@ -10,7 +10,7 @@
 #' @param run a  list object as returned by varied_runs() or reparse_runs()
 #' @param a The alpha value for calculating the null rejection rate, defaults to 0.05
 #' @returns A data frame with the following summary statistics listed above
-#' @example McBias/examples/Dag_example.R
+#' @example examples/Dag_example.R
 #' @seealso [varied_runs()], [ci_ridges()], [reparse_runs()]
 #' @export
 
