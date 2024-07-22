@@ -24,12 +24,14 @@ create_data = function(dag, n, positivity = F, ...){
   reclassify = as.integer
   jag_dag = make_model(dag, ...)
   sim_df = HydeNet::bindSim(HydeNet::HydeSim(jag_dag, variable.names = colnames(jag_dag$dag), n.iter = n, bind = FALSE))
+  sim_df = sim_df[c(-length(sim_df), -(length(sim_df)-1))]
+
   relabel = lapply(sim_df, check_integer) # JAGS labels integers as numeric, have to reclassify them
   relabel = relabel[relabel != FALSE]
   relabel = names(relabel)
   sim_df[relabel] = lapply(sim_df[relabel], reclassify)
-  sim_df = sim_df[c(-length(sim_df), -(length(sim_df)-1))]
-  sep_check = length(which(duplicated(t(sim_df)==TRUE)))
+
+  sep_check = length(which(duplicated(t(sim_df))==TRUE))
   if(sep_check != 0){
     stop("complete separation occured (one variable completly predicts another). A beta value may be too large, or a sample size may be too small")
   }
