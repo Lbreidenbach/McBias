@@ -11,7 +11,7 @@
 #'
 #' @return The original data frame with an additional propensity score column and an additional propensity score weight column
 #'
-#'@examples examples/propensity_score_df.R
+#'@example examples/propensity_score_df.R
 #'@seealso [varied_runs()], [applied_methods()]
 #'@export
 #'

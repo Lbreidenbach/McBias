@@ -25,7 +25,7 @@
 #' * p value
 #' * number of samples in the dataset
 #'
-#'@examples McBias/examples/apply_methods_to_matrix.R
+#'@example examples/apply_methods_to_matrix.R
 #'@seealso [varied_runs()], [lm_beta()], [odds_ratio()], [get_ps()], [matchit_matching()], [ps_weight()], [risk_ratio()]
 #'@export
 #'

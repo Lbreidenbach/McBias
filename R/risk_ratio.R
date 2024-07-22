@@ -19,7 +19,7 @@
 #' * p value
 #' * number of samples in the dataset
 #'
-#'@examples examples/effect_estimate_functions.R
+#'@example examples/effect_estimate_functions.R
 #'@seealso [varied_runs()], [apply_methods()]
 #'@export
 #'

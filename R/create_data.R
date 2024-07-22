@@ -14,7 +14,7 @@
 #' @return This function returns a simulated data frame. Each column in the data frame corresponds to a node
 #' in the DAG object. The data frame will have n rows. Nodes with continuous distributions will have a
 #' double class, and nodes with binary distributions will have an integer class.
-#'@examples examples/create_data_example.R
+#'@example examples/create_data_example.R
 #'@export
 #'
 
