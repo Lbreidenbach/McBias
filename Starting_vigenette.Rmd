@@ -1,0 +1,271 @@
+---
+title: "Getting started with McBias"
+author: "Ash Breidenbach"
+date: "2024-03-05"
+output: html_document
+---
+```{r,echo=FALSE, message=FALSE}
+library(rjags)
+library(HydeNet)
+library(plyr)
+library(dplyr)
+library(MatchIt)
+library(logisticRR)
+library(ggplot2)
+library(gtable)
+library(grid)
+library(ggridges)
+library(McBias)
+
+data("vignette_data")
+
+```
+
+
+The library McBias simulates and analyzes datasets using a directed acyclic graph object (DAG object) that the user sets. This allows the user to create a dataset where all effect sizes are known. By analyzing the dataset in a biased way, the user can quantify how much the biased effect size drifts from the originally set effect size. 
+
+**Note: if only bernoulli or gaussian distributions are used to set nodes then the user can use the accompanying rshiny app which will write the lines of code below. In this case, skip to step 3**.
+
+## Step 1 - Create a Directed Acyclic Graph (DAG)
+
+To begin we must set our DAG object. Our DAG object must not have bidirectional arrows or cycles. Each node in the DAG will correspond to a different column in the dataset. 
+
+```{r}
+
+#We will start with a simple DAG where node A affects node B and C, and node B and C affect Node D
+#We write which variables cause others like this: 'effect|cause1*cause2*cause_n' or like this 'effect|cause1 + effect|cause2 + effect|cause_n'.
+#Start each Hydenetwork argurment with ~
+
+my_dag = HydeNetwork(~B|A + C|A + D|B*C)
+plot(my_dag)
+```
+
+## Step 2 - Add distributions to your DAG
+
+Once we've established a DAG, we must set each node's distribution. We can see all our node's distributions are currently unspecified.
+```{r}
+writeNetworkModel(my_dag, pretty = TRUE)
+```
+
+We'll set the distributions as follows:
+
+* Node **A** is binary, and will have a **Bernoulli** distribution with a probability (p) of **0.5**
+* Node **B** is continuous and will have a **Gaussian** distribution with a mean of **0** and an sd of **1**
+* Node **C** is binary, and will have a **Bernoulli** distribution with a probability (p) of **0.9**
+* Node **D** is binary, and will have a **Bernoulli** distribution with a probability (p) of **0.25**
+
+Each interaction between nodes must have a set effect size. For this example we'll set those as follows:
+
+* **A** -> **B** is 0.2
+* **A** -> **C** is 0.8
+* **B** -> **D** is 0.05
+* **C** -> **D** is 1.2
+
+
+```{r}
+#we can set the distributions of each node with the setNode() command from Hydenet
+
+#Node A is a binary variable, so its nodeType is set to "dbern" for Bernoulli. Node A is not affected by any other nodes, and thus is an independent variable. Its probability is directly set.
+
+my_dag = setNode(my_dag, A, nodeType = "dbern", prob = 0.5)
+
+
+#Node B is gaussian, so it's nodeType is set to "dnorm". It is dependent on node A so its mean changes depending on if a 1 or 0 is chosen for node A during the simulation. Since the effect size of A -> B is 0.2, we multiply that 1 or 0 by 0.2. Thus, to set node B's overall mean we take the mean, 0, and subtract it by the product of node A's probability and effect size (0 - 0.2 * 0.5).
+
+#Since Hydenet is a wrapper for rjags, non-numeric values must be in a string, hence the paste0() function is needed.
+
+my_dag = setNode(my_dag, B, nodeType = "dnorm", mu = paste0(0.2," * A + ",0 - 0.2*0.5), tau = 1)
+
+
+#Node C is a dependent binary variable, and thus must be wrapped in an "ilogit(" ")" command from rjags. This ensures the probability stays between 0 and 1
+
+#Node C's overall probability is set with the set_p() function where the first argument is the overall probability (0.9) and the second argument is the product of node A's probability and effect size (0.8*0.5 for node C)
+
+my_dag = setNode(my_dag, C, nodeType = "dbern", prob = paste0("ilogit(",0.8," * A + ",set_p(0.9, 0.8*0.5),")"))
+
+
+#Node D is also a dependent binary variable, so it is set similarly to node C. Note that node B's product of its effect size and mean is added to the product of node C's effect size and probability. I wrote out node B's product in set_p() for illustrative effect, even though in this case it is unnecessary because node B's product = 0
+
+my_dag = setNode(my_dag, D, nodeType = "dbern", prob = paste0("ilogit(",0.05," * B + ", 1.2," * C + ",set_p(0.25, 1.2 * 0.9 + 0.05 * 0 ),")"))
+
+#We can now see that all our nodes in our DAG object have a set distribution
+writeNetworkModel(my_dag, pretty = TRUE)
+
+```
+
+
+## Step 3 - create simulations from the DAG
+
+Now that a DAG object is set, simulations can began. create_data() allows a single dataset to be generated. Binary nodes are in the integer class by default. The user may reclassify them if desired.
+
+```{r, results=FALSE}
+sim_df = create_data(my_dag, 10000)
+factor_sim_df = create_data(my_dag, 10000, reclassify = as.factor)
+```
+```{r}
+str(sim_df)
+str(factor_sim_df)
+```
+```{r}
+knitr::kable(head(sim_df))
+
+```
+
+
+
+We can check this created dataset to make sure our set distributions were set the way we expected.
+
+*Note: Bernoulli nodes that are dependent on gaussian nodes can sometimes skew positively or negatively as their probability approaches 0 or 1 respectively. In this case, if the probability is set near 0, the generated dataset's prevalence for the node can skew higher. If the probability is near 1 the simulated dataset's prevalence can skew lower.*
+
+```{r}
+sum_df = data.frame("Node A prevalence" = sum(sim_df$A)/length(sim_df$A),
+                    "Node B mean" = round(mean(sim_df$B), 4),
+                    "Node C prevalence" = sum(sim_df$C)/length(sim_df$C),
+                    "Node D prevalence" = sum(sim_df$D)/length(sim_df$D))
+
+knitr::kable(sum_df)
+
+```
+
+## Step 4 - Analyze the simulations 
+
+Now that we have a working DAG object (my_dag) we can start to analyze it in various ways.  varied_runs() generates multiple datasets and analyzes them as specified. It returns the following summary statistics for each dataset:
+
+1. **ratio** Odds/risk ratio if applicable (will return NAs if not)
+2. **calculated_ate** estimated effect size/ estimated average treatment effect (ATE)
+3. **lower_int** lower 95% confidence interval
+4. **upper_int** upper 95% confidence interval
+5. **p_values** p_value
+6. **exp_prevalence** exposure prevalence, if applicable (will return NAs if not)
+7. **out_prevalence** outcome prevalence, is applicable (will return NAs if not)
+8. **sample_population** sample population
+    + If matching methods are used it will report the matched sample population (i.e. if there are 10 cases in a dataset of 100, and 1:1 matching is used, the sample population becomes 20, as unmatched cases are thrown).
+    + if selection bias is simulated, n will be the number of samples that entered the analyzed dataset
+9. **set_ate** The effect size set in the original model (considered as the true effect size)
+10. **over_r** the set overdiagnosis rate, if set (will return 0s if not)
+11. **under_r** the set underdiagnosis rate, if set (will return 0s if not)
+
+Varied runs can analyze the dataset with various methods as set by the user. if this is the case, it will return those 11 summary statistics for method used. The methods run are bulleted below:
+* **If the outcome is Bernoulli**:
+    + "logistic_regression* is run. "ps_weighting" or propensity score weighting is also run if there are covariates.
+* **If the outcome is Gaussian**:
+    + "linear_regression" is run. "ps_weighting" or propensity score weighting is also run if there are covariates.
+We'll fill in the arguements below:
+
+* **runs** = 500
+    + 500 datsets will be created and analyzed
+* **dag** = my_dag
+    + must be a DAG object
+* **exposure** = "B"
+* **outcome** = "C"
+* **covariates** = "A"
+* **n** = 100000
+    + each dataset will have 100000 samples
+  
+```{r, eval=FALSE}
+ideal = varied_runs(500, my_dag, "B", "C", "A", n = 100000)
+```
+
+The run results are saved as a list of 11. We can splice the results to look at any summary statistic we're interested in.
+
+```{r}
+knitr::kable(head(ideal$calculated_ate))
+
+#We can further splice to grab a specific method
+head(ideal$calculated_ate[,"logistic_regression"])
+
+ideal_sum_df = data.frame("logistice regression effect estimate" = round(mean(ideal$calculated_ate[,"logistic_regression"]), 3),
+                          "true effect estimate" = mean(ideal$set_ate[,"logistic_regression"]),
+                          "average p value" = round(mean(ideal$p_values[,"logistic_regression"]), 3))
+
+knitr::kable(ideal_sum_df)
+```
+```{r, echo=FALSE}
+ate = round(mean(ideal$calculated_ate[,"logistic_regression"]), 3)
+tb = mean(ideal$set_ate[,"logistic_regression"])
+pval = round(mean(ideal$p_values[,"logistic_regression"]), 3)
+```
+So here we can see that when node **A** is adjusted on and logistic regression is used, we get a mean effect size estimate of `r ate` between **B** and **C** over the 500 simulated datasets. Since **B** has no effect size on **C**, the true effect size is `r tb`. The average p_value is `r pval`. This is as expected. The estimate is close to 0 which corresponds to a p value near 0.5.
+
+We can visually compare how the methods compared to each other by using ci_ridges().
+
+```{r}
+ci_ridges(ideal)
+```
+
+We can use beta_summary() to get more details on the simulation we just ran. 
+
+beta_summary() gives the following outputs:
+* **Bias** and its standard error. Bias is the difference between the calculated effect size and the true effect size
+* **Coverage** and its standard error. Coverage gives the percentage of calculated effect sizes that contained the true effect size in their 95% confidence intervals. The aim is to have coverage be around 95%
+* **Rejection rate** and its standard error. Rejection rate is the percentage of times the null hypothesis was rejected as an alpha value. The alpha value can be set in the second argument and defaults to 0.05.
+* **Mean B estimate** gives the mean of all the calculated effect sizes.
+* **B estimate std dev** gives the standard deviation of all the calculated effect sizes. Provides insight into changes in precision
+
+```{r}
+ideal_sim_summary = round(beta_summary(ideal, a = 0.05), 4)
+knitr::kable(ideal_sim_summary)
+```
+
+
+**ideal** was the proper analysis. The collider **D** was not adjusted, and the confounder **A** was. We can see in this case that the effect size estimate does not drift from the mean. The summary of ideal's simulation reflects this. It has very little bias. Since the true effect size was 0 in this case, we see that the rejection rate approximately equals the alpha value, which we set at 0.05. Coverage also approximately equals 95%. Overall this means that when everything is adjusted properly one gets results with very little bias, and the true effect size approximately equals the calculated effect size.
+
+What if the ideal couldn't be obtained? Suppose we didn't know to adjust for **A** or were given a data set that was stratified on **D**? We can simulate the following scenarios to estimate how much bias these two scenarios would cause.
+
+* **naive**: the dataset isn't adjusted in anyway. Here we expect to see confounder bias from node **A**
+* **selection_bias**: we assume that node **D** represents entry into the study. We will cut samples from the dataset where **D** = 0 and then analyze them. 
+* **adjust_all**: we adjust on both **A** and **D** 
+
+```{r, eval=FALSE}
+naive = varied_runs(500, my_dag, "B", "C", n = 100000)
+selection_bias = varied_runs(500, my_dag, "B", "C", sb = "D", n = 400000) #n is larger here. D has a prevalence of 0.25 and only samples with D will make it to the cut data set that is analyzed. If we want n to be similar to the runs we are comparing it too, we'll have to multiply n * 1/p 
+
+adjust_all = varied_runs(500, my_dag, "B", "C", c("A", "D"), n = 100000)  
+```
+
+###Step 5- compare multiple simulations to each other
+
+To compare these datasets we can use reparse_runs(). You can use this to compare how different scenarios did. To use this, the following requirements must be met.
+
+* All scenarios must have the same number of iterations for varied_runs, in this example all scenarios have 500 iterations
+* The DAG object, exposure, and outcome must remain the same across all scenarios
+
+For this example, I want to compare the "logistic regression" method results of each scenario, so method = "logistic_regression".
+```{r}
+run_list = list(ideal, naive, selection_bias, adjust_all)
+combined_log_r = reparse_runs(run_list, method = "logistic_regression", list_names = c("ideal", "naive", "selection bias", "adjust all"))
+```
+
+You can see in combined_log_r that the methods have been switched out for the different scenarios, with each run's logistic_regression results used.
+
+```{r}
+head(combined_log_r$calculated_ate)
+```
+
+as we did before, you can use ci_ridges  for quick comparisons
+```{r}
+ci_ridges(combined_log_r)
+
+```
+
+As we can see, the other non-ideal scenarios show signs of bias. 
+
+To make further calculations and measurements we can use beta_summary(). 
+beta_summary() reports: 
+* bias (difference between the mean beta estimate and the true beta)
+* the percentage of p values rejected at the set alpha value (default is a = 0.05)
+* B estimate mean squared error (MSE)
+* empirical standard error (for model verification)
+* model standard error (for model verification)
+* Relative % error in model standard error
+* mean of beta estimates
+* standard deviation of beta estimates
+* percent of beta estimates *over* the 95% confidence interval
+* percent of beta estimates *under* the 95% confidence interval
+
+```{r}
+combined_summary = round(beta_summary(combined_log_r), 4)
+knitr::kable(combined_summary)
+```
+
+We can verify here that significant bias is present in all non-ideal scenarios. We can see that the false positive rate for all non-ideal scenarios is higher because the bias caused the mean calculated effect estimate to shift away from 0. The non-ideal scenario with the next lowest bias, adjust_all, still has about 3 times the likelihood of rejecting the null that the ideal scenario does. 
