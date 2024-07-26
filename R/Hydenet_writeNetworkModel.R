@@ -17,7 +17,7 @@
 #' @seealso \code{\link{writeJagsModel}}, \code{\link{writeJagsFormula}}
 #'
 #' @examples
-#' data(PE, package='HydeNet')
+#' data(PE, package='McBias')
 #' Net <- HydeNetwork(~ wells +
 #'                      pe | wells +
 #'                      d.dimer | pregnant*pe +

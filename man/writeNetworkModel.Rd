@@ -20,7 +20,7 @@ each node is generated and all of the node models are pasted into a
 single JAGS model script.
 }
 \examples{
-data(PE, package='HydeNet')
+data(PE, package='McBias')
 Net <- HydeNetwork(~ wells +
                      pe | wells +
                      d.dimer | pregnant*pe +

@@ -57,7 +57,7 @@ estimating them from the data.
 \examples{
 \dontrun{
 #* NOTE: writeJagsModel isn't an exported function
-data(PE, package='HydeNet')
+data(PE, package='McBias')
 Net <- HydeNetwork(~ wells +
                      pe | wells +
                      d.dimer | pregnant*pe +
@@ -65,8 +65,8 @@ Net <- HydeNetwork(~ wells +
                      treat | d.dimer*angio +
                      death | pe*treat,
                      data = PE)
-HydeNet:::writeJagsModel(Net, 'pe')
-HydeNet:::writeJagsModel(Net, 'treat')
+McBias:::writeJagsModel(Net, 'pe')
+McBias:::writeJagsModel(Net, 'treat')
 }
 
 }

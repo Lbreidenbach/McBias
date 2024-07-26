@@ -32,7 +32,7 @@ create an object representing a Bayesian graphical model.
 equivalent to running \code{jags.model(textConnection(writeNetworkModel(network)))}.
 }
 \examples{
-data(PE, package="HydeNet")
+data(PE, package="McBias")
 Net <- HydeNetwork(~ wells +
                      pe | wells +
                      d.dimer | pregnant*pe +

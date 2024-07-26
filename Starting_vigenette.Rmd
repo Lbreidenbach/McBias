@@ -6,7 +6,6 @@ output: html_document
 ---
 ```{r,echo=FALSE, message=FALSE}
 library(rjags)
-library(HydeNet)
 library(plyr)
 library(dplyr)
 library(MatchIt)
@@ -62,7 +61,7 @@ Each interaction between nodes must have a set effect size. For this example we'
 * **C** -> **D** is 1.2
 
 
-```{r}
+```{r, message=FALSE}
 #we can set the distributions of each node with the setNode() command from Hydenet
 
 #Node A is a binary variable, so its nodeType is set to "dbern" for Bernoulli. Node A is not affected by any other nodes, and thus is an independent variable. Its probability is directly set.
@@ -96,15 +95,11 @@ writeNetworkModel(my_dag, pretty = TRUE)
 
 ## Step 3 - create simulations from the DAG
 
-Now that a DAG object is set, simulations can began. create_data() allows a single dataset to be generated. Binary nodes are in the integer class by default. The user may reclassify them if desired.
+Now that a DAG object is set, simulations can began. create_data() allows a single dataset to be generated. Binary nodes are portrayed as 0 or 1 integers
 
 ```{r, results=FALSE}
 sim_df = create_data(my_dag, 10000)
-factor_sim_df = create_data(my_dag, 10000, reclassify = as.factor)
-```
-```{r}
-str(sim_df)
-str(factor_sim_df)
+
 ```
 ```{r}
 knitr::kable(head(sim_df))
@@ -115,7 +110,7 @@ knitr::kable(head(sim_df))
 
 We can check this created dataset to make sure our set distributions were set the way we expected.
 
-*Note: Bernoulli nodes that are dependent on gaussian nodes can sometimes skew positively or negatively as their probability approaches 0 or 1 respectively. In this case, if the probability is set near 0, the generated dataset's prevalence for the node can skew higher. If the probability is near 1 the simulated dataset's prevalence can skew lower.*
+*Note: Bernoulli nodes that are dependent on Gaussian nodes can sometimes skew positively or negatively as their probability approaches 0 or 1 respectively. In this case, if the probability is set near 0, the generated dataset's prevalence for the node can skew higher. If the probability is near 1 the simulated dataset's prevalence can skew lower.*
 
 ```{r}
 sum_df = data.frame("Node A prevalence" = sum(sim_df$A)/length(sim_df$A),
@@ -129,7 +124,7 @@ knitr::kable(sum_df)
 
 ## Step 4 - Analyze the simulations 
 
-Now that we have a working DAG object (my_dag) we can start to analyze it in various ways.  varied_runs() generates multiple datasets and analyzes them as specified. It returns the following summary statistics for each dataset:
+Now that we have a working DAG object (my_dag) we can start to analyze it in various ways.  varied_runs() generates multiple datasets and analyzes them as specified. It returns a list with 11 elements, with each element corresponding to a different summary statistic as shown below:
 
 1. **ratio** Odds/risk ratio if applicable (will return NAs if not)
 2. **calculated_ate** estimated effect size/ estimated average treatment effect (ATE)
@@ -146,19 +141,23 @@ Now that we have a working DAG object (my_dag) we can start to analyze it in var
 11. **under_r** the set underdiagnosis rate, if set (will return 0s if not)
 
 Varied runs can analyze the dataset with various methods as set by the user. if this is the case, it will return those 11 summary statistics for method used. The methods run are bulleted below:
-* **If the outcome is Bernoulli**:
-    + "logistic_regression* is run. "ps_weighting" or propensity score weighting is also run if there are covariates.
-* **If the outcome is Gaussian**:
-    + "linear_regression" is run. "ps_weighting" or propensity score weighting is also run if there are covariates.
-We'll fill in the arguements below:
+
+**If the outcome is Bernoulli**: "logistic_regression* is run. "ps_weighting" or propensity score weighting is also run if there are covariates.
+
+**If the outcome is Gaussian**: "linear_regression" is run. "ps_weighting" or propensity score weighting is also run if there are covariates.
+
+The user also has the option of installing matchit and running matchit analyses, these are included with the other methods if set. Only greedy matching methods are available at this time.
+
+We'll fill in the arguments below:
 
 * **runs** = 500
-    + 500 datsets will be created and analyzed
+    + 500 datasets will be created and analyzed
 * **dag** = my_dag
     + must be a DAG object
 * **exposure** = "B"
 * **outcome** = "C"
 * **covariates** = "A"
+    + A will be adjusted on
 * **n** = 100000
     + each dataset will have 100000 samples
   
@@ -169,33 +168,19 @@ ideal = varied_runs(500, my_dag, "B", "C", "A", n = 100000)
 The run results are saved as a list of 11. We can splice the results to look at any summary statistic we're interested in.
 
 ```{r}
-knitr::kable(head(ideal$calculated_ate))
-
-#We can further splice to grab a specific method
-head(ideal$calculated_ate[,"logistic_regression"])
-
-ideal_sum_df = data.frame("logistice regression effect estimate" = round(mean(ideal$calculated_ate[,"logistic_regression"]), 3),
-                          "true effect estimate" = mean(ideal$set_ate[,"logistic_regression"]),
-                          "average p value" = round(mean(ideal$p_values[,"logistic_regression"]), 3))
-
-knitr::kable(ideal_sum_df)
+head(ideal$calculated_ate)
 ```
-```{r, echo=FALSE}
-ate = round(mean(ideal$calculated_ate[,"logistic_regression"]), 3)
-tb = mean(ideal$set_ate[,"logistic_regression"])
-pval = round(mean(ideal$p_values[,"logistic_regression"]), 3)
-```
-So here we can see that when node **A** is adjusted on and logistic regression is used, we get a mean effect size estimate of `r ate` between **B** and **C** over the 500 simulated datasets. Since **B** has no effect size on **C**, the true effect size is `r tb`. The average p_value is `r pval`. This is as expected. The estimate is close to 0 which corresponds to a p value near 0.5.
 
 We can visually compare how the methods compared to each other by using ci_ridges().
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 ci_ridges(ideal)
 ```
 
 We can use beta_summary() to get more details on the simulation we just ran. 
 
 beta_summary() gives the following outputs:
+
 * **Bias** and its standard error. Bias is the difference between the calculated effect size and the true effect size
 * **Coverage** and its standard error. Coverage gives the percentage of calculated effect sizes that contained the true effect size in their 95% confidence intervals. The aim is to have coverage be around 95%
 * **Rejection rate** and its standard error. Rejection rate is the percentage of times the null hypothesis was rejected as an alpha value. The alpha value can be set in the second argument and defaults to 0.05.
@@ -206,11 +191,11 @@ beta_summary() gives the following outputs:
 ideal_sim_summary = round(beta_summary(ideal, a = 0.05), 4)
 knitr::kable(ideal_sim_summary)
 ```
+So here we can see that when node **A** is adjusted we get a mean effect size estimate near 0 between **B** and **C** over the 500 simulated datasets. Since **B** has no set arc on **C**, the true effect size is set to 0. 
 
+**ideal** was the proper analysis. The collider **D** was not adjusted, and the confounder **A** was. The summary of ideal's simulation reflects this. The difference between the mean of the calculated effect sizes and the true effect size is near 0. We also see that the rejection rate approximately equals the alpha value, which we set at 0.05. Coverage also approximately equals 95%. Overall this means that when everything is adjusted properly one gets results with very little bias, and the true effect size approximately equals the calculated effect size.
 
-**ideal** was the proper analysis. The collider **D** was not adjusted, and the confounder **A** was. We can see in this case that the effect size estimate does not drift from the mean. The summary of ideal's simulation reflects this. It has very little bias. Since the true effect size was 0 in this case, we see that the rejection rate approximately equals the alpha value, which we set at 0.05. Coverage also approximately equals 95%. Overall this means that when everything is adjusted properly one gets results with very little bias, and the true effect size approximately equals the calculated effect size.
-
-What if the ideal couldn't be obtained? Suppose we didn't know to adjust for **A** or were given a data set that was stratified on **D**? We can simulate the following scenarios to estimate how much bias these two scenarios would cause.
+What if the ideal couldn't be obtained? Suppose we didn't know to adjust for **A** or were given a dataset that was stratified on **D**? We can simulate the following scenarios to estimate how much bias different scenarios like these would cause.
 
 * **naive**: the dataset isn't adjusted in anyway. Here we expect to see confounder bias from node **A**
 * **selection_bias**: we assume that node **D** represents entry into the study. We will cut samples from the dataset where **D** = 0 and then analyze them. 
@@ -218,7 +203,7 @@ What if the ideal couldn't be obtained? Suppose we didn't know to adjust for **A
 
 ```{r, eval=FALSE}
 naive = varied_runs(500, my_dag, "B", "C", n = 100000)
-selection_bias = varied_runs(500, my_dag, "B", "C", sb = "D", n = 400000) #n is larger here. D has a prevalence of 0.25 and only samples with D will make it to the cut data set that is analyzed. If we want n to be similar to the runs we are comparing it too, we'll have to multiply n * 1/p 
+selection_bias = varied_runs(500, my_dag, "B", "C", sb = "D", n = 400000) #n is larger here. D has a prevalence of 0.25 and only samples with D will make it to the cut dataset that is analyzed. If we want n to be similar to the runs we are comparing it too, we'll have to multiply n * 1/p 
 
 adjust_all = varied_runs(500, my_dag, "B", "C", c("A", "D"), n = 100000)  
 ```
@@ -230,7 +215,7 @@ To compare these datasets we can use reparse_runs(). You can use this to compare
 * All scenarios must have the same number of iterations for varied_runs, in this example all scenarios have 500 iterations
 * The DAG object, exposure, and outcome must remain the same across all scenarios
 
-For this example, I want to compare the "logistic regression" method results of each scenario, so method = "logistic_regression".
+For this example, we'll compare the "logistic regression" method results of each scenario, so method = "logistic_regression".
 ```{r}
 run_list = list(ideal, naive, selection_bias, adjust_all)
 combined_log_r = reparse_runs(run_list, method = "logistic_regression", list_names = c("ideal", "naive", "selection bias", "adjust all"))
@@ -243,7 +228,7 @@ head(combined_log_r$calculated_ate)
 ```
 
 as we did before, you can use ci_ridges  for quick comparisons
-```{r}
+```{r, message=FALSE, warning=FALSE}
 ci_ridges(combined_log_r)
 
 ```

@@ -108,7 +108,7 @@
 #'
 #' You may still use the JAGS names, which allows you to specify a
 #' distribution in JAGS that does not have an R equivalent listed. Note,
-#' however, that where R functions are supported, \code{HydeNet} anticipates
+#' however, that where R functions are supported, \code{McBias} anticipates
 #' the parameter names to be given following R conventions (See
 #' the \code{RParameter} column of \code{jagsDists}.)
 #'
@@ -125,9 +125,9 @@
 #' factor variables with a large number of levels, it can be difficult to remember
 #' what value corresponds to what level.
 #'
-#' \code{HydeNet} uses an internal (unexported) function within \code{setNode} to allow
+#' \code{McBias} uses an internal (unexported) function within \code{setNode} to allow
 #' an alternate specification: \code{y ~ c * (x == "Yes")}.  So long as the factors in
-#' the formula are previously defined within the network structure, \code{HydeNet}
+#' the formula are previously defined within the network structure, \code{McBias}
 #' will translate the level into its numeric code.
 #'
 #' Note that it is required to write \code{x == "Yes"}.  \code{"Yes" == x} will not
@@ -136,12 +136,12 @@
 #' @section Validation:
 #' The validation of parameters is performed by comparing the values provided with
 #' the limits defined in the \code{jagsDists$paramLogic} variable. (look at
-#' \code{data(jagsDists, data='HydeNet')}.  For most node types, validation will
+#' \code{data(jagsDists, data='McBias')}.  For most node types, validation will
 #' be performed for numeric variables.  For deterministic variables, the validation
 #' will only check that the parameter definition is a formula.
 #'
 #' It is possible to pass character strings as definitions, but when this is done,
-#' \code{HydeNet} assumes you are passing JAGS code.  Unfortunately, \code{HydeNet}
+#' \code{McBias} assumes you are passing JAGS code.  Unfortunately, \code{McBias}
 #' doesn't have to capability to validate JAGS code, so if there is an error in
 #' the character string definition, it won't show up until you try to compile the
 #' network.  If you pass a character string as a parameter and leave
@@ -150,13 +150,13 @@
 #'
 #' The two exceptions to this rule are when you pass \code{fromFormula()} and
 #' \code{fromData()} as the parameter definition.  These will skip the validation
-#' without warning, since the definition will be built by \code{HydeNet} and be
+#' without warning, since the definition will be built by \code{McBias} and be
 #' proper JAGS code (barring any bugs, of course).
 #'
 #' @author Jarrod Dalton and Benjamin Nutter
 #'
 #' @examples
-#' data(PE, package="HydeNet")
+#' data(PE, package="McBias")
 #' Net <- HydeNetwork(~ wells +
 #'                      pe | wells +
 #'                      d.dimer | pregnant*pe +

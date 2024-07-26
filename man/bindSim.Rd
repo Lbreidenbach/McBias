@@ -28,7 +28,7 @@ can be bound together.  Subsequently, the multiple runs are bound
 together.  Lastly, the factors are relabeled, if requested.
 }
 \examples{
-#' data(PE, package="HydeNet")
+#' data(PE, package="McBias")
 Net <- HydeNetwork(~ wells +
                      pe | wells +
                      d.dimer | pregnant*pe +

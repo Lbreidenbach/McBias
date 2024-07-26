@@ -21,7 +21,7 @@
 create_data = function(dag, n, positivity = F, ...){
   reclassify = as.integer
   jag_dag = make_model(dag, ...)
-  sim_df = HydeNet::bindSim(HydeNet::HydeSim(jag_dag, variable.names = colnames(jag_dag$dag), n.iter = n, bind = FALSE))
+  sim_df = bindSim(HydeSim(jag_dag, variable.names = colnames(jag_dag$dag), n.iter = n, bind = FALSE))
   sim_df = sim_df[c(-length(sim_df), -(length(sim_df)-1))]
 
   relabel = lapply(sim_df, check_integer) # JAGS labels integers as numeric, have to reclassify them
