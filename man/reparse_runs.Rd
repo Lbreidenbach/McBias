@@ -41,8 +41,7 @@ The final output will be a list of 11 elements with each element corresponding t
 \examples{
 #creates the causal diagram
 my_dag = HydeNetwork(~B|A + C|A*B + D|B*C)
-#can plot for better visualization
-plot(my_dag)
+
 
 #if we set up a flexible dag like this, we can quickly change the effect size between nodes A and C as well as the prevalence of node A
 flex_dag = function(x,y){
