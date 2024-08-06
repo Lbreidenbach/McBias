@@ -7,7 +7,6 @@ Authors@R:
 Depends: R (>= 3.2.0), rjags, plyr, dplyr, checkmate, magrittr, stringr, utils, stats
 Suggests: 
     MatchIt,
-    logisticRR,
     ggplot2,
     gtable,
     grid,
