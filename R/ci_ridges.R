@@ -17,7 +17,13 @@
 ci_ridges = function(run, title =NULL, subtitle=NULL){
   ate_val = as.data.frame(run[[2]])
   drawn_ci = beta_sum(run)
-  all_in_ci = unlist(lapply(c(1:ncol(run[[2]])), function(x){
+
+  if(is.null(dim(run[[1]]))==T){
+    colnames(ate_val) = "regression"
+
+  }
+
+  all_in_ci = unlist(lapply(c(1:ncol(ate_val)), function(x){
     if(drawn_ci[7,x]==0&drawn_ci[8,x]==0){
       return(TRUE)
     }else{
@@ -48,8 +54,8 @@ ci_ridges = function(run, title =NULL, subtitle=NULL){
   data$names = as.factor(data$names)
   data$tag = as.character(data$tag)
 
-  lines = drawn_ci[1:2,]
-  nas_df = drawn_ci[7:8,]
+  lines = drawn_ci[1:2, , drop = FALSE]
+  nas_df = drawn_ci[7:8, , drop = FALSE]
   #na_dex
   inf_dex = which(is.na(nas_df[1,]))
   neg_inf_dex = which(is.na(nas_df[2,]))
@@ -59,12 +65,16 @@ ci_ridges = function(run, title =NULL, subtitle=NULL){
   lines[2, neg_inf_dex]= -Inf
 
 
+
   factor_df = as.data.frame(unique(as.integer(data$names)))
   factor_df = t(factor_df)
   colnames(factor_df) = unique(as.character(data$names))
   rownames(factor_df) = "i"
+
+  #FIX HERE, col name problem
   lines = rbind(lines, factor_df, all_in_ci)
-  rownames(lines[4,]) = "all"
+  # rownames(lines[4, ]) = "all" #perhaps unneseccary??
+
   #lines = lines[,order(lines[nrow(lines),])]
 
   drawn_ci = rbind(drawn_ci, factor_df)

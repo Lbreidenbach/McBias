@@ -1,8 +1,10 @@
 #'@noRd
 
 beta_sum = function(run, a=0.05){
-  require(dplyr)
+
   #call needed data
+
+
   ate = run[[9]][2]
   calc_ate = as.data.frame(run[[2]])
   lower_int = as.data.frame(run[[3]])
@@ -43,8 +45,17 @@ beta_sum = function(run, a=0.05){
   mean_beta = sapply(as.list(unique(data$names)), function(x) mean((data %>% dplyr::filter(names == x))[[4]]))
   names(mean_beta) = colnames(run[[2]])
   sd_beta = sapply(as.list(unique(data$names)), function(x) sd((data %>% dplyr::filter(names == x))[[4]]))
-  prop_over_ci = sapply(unique(data$names), function(x) length((data_over_ci %>% dplyr::filter(names == x))[[4]])/length(run[[1]][,1]))
-  prop_under_ci = sapply(unique(data$names), function(x) length((data_under_ci %>% dplyr::filter(names == x))[[4]])/length(run[[1]][,1]))
+  if(is.null(dim(run[[1]]))==T){
+    prop_over_ci = sum(data$over_ci)/length(data$over_ci)
+    prop_under_ci = sum(data$under_ci/length(data$under_ci))
+    beta_bias_mcse =sapply(as.list(unique(data$names)), function(x) sqrt(sum(((data %>% dplyr::filter(names == x))[[4]]-mean_beta)^2) * 1/(n*(n-1))) )
+
+  }else{
+
+    prop_over_ci = sapply(unique(data$names), function(x) length((data_over_ci %>% dplyr::filter(names == x))[[4]])/length(run[[1]][,1]))
+    prop_under_ci = sapply(unique(data$names), function(x) length((data_under_ci %>% dplyr::filter(names == x))[[4]])/length(run[[1]][,1]))
+    beta_bias_mcse =sapply(as.list(unique(data$names)), function(x) sqrt(sum(((data %>% dplyr::filter(names == x))[[4]]-mean_beta[[x]])^2) * 1/(n*(n-1))) )
+  }
 
   beta_se =  sapply(as.list(unique(data$names)), function(x) sd((data %>% dplyr::filter(names == x))[[4]])/sqrt(n))
   beta_bias = mean_beta-ate
@@ -53,7 +64,7 @@ beta_sum = function(run, a=0.05){
   coverage = 1-(prop_over_ci+prop_under_ci)
 
   #MCMC std error of functions
-  beta_bias_mcse =sapply(as.list(unique(data$names)), function(x) sqrt(sum(((data %>% dplyr::filter(names == x))[[4]]-mean_beta[[x]])^2) * 1/(n*(n-1))) )
+
   coverage_mcse = sqrt((coverage*(1-coverage))/n)
   reject_per_mcse = sqrt((reject_per*(1-reject_per))/n)
 
@@ -63,6 +74,14 @@ beta_sum = function(run, a=0.05){
                                    beta_bias_mcse, reject_per_mcse, coverage_mcse)
   )
   beta_in_ci[sapply(beta_in_ci, is.infinite)]=NA
-  beta_in_ci = beta_in_ci[,c(colnames(run[[1]]))] #reorder columns to original run order for indexing
+  if(is.null(dim(run[[1]]))==T){
+    colnames(beta_in_ci) = "regression"
+
+  }else{
+    beta_in_ci = beta_in_ci[,c(colnames(run[[1]]))] #reorder columns to original run order for indexing
+
+
+  }
   return(beta_in_ci)
+
 }

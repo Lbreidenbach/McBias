@@ -18,7 +18,7 @@
 beta_summary = function(run, a = 0.05){
   the_table = suppressWarnings(beta_sum(run,a))
   the_table[c(7,8,11,12,14,15),] = the_table[c(7,8,11,12,14,15),]*100
-  the_table = the_table[c(5:8, 10:15),]
+  the_table = the_table[c(5:8, 10:15), , drop = FALSE]
   the_table = t(the_table)
   the_table = as.data.frame(the_table)
   the_table = the_table[,c(5,8,7,10,6,9,1,2)]
