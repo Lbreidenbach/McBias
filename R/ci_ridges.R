@@ -139,7 +139,7 @@ ci_ridges = function(run, title =NULL, subtitle=NULL){
                                                                         c(sort(c(mean(data[data$value == x,]$lower))), sort(c(mean(data[data$value == x,]$upper)))), na.rm = TRUE),
                              fill = "lightblue2",
                              alpha= 0.01) +
-    ggplot2::geom_segment( aes(y=1, yend=length(colnames(ate_val))+1, x=run[[9]][1], xend=run[[9]][1]), color="navy", linetype = "dashed", lwd = 1)
+    ggplot2::geom_vline( xintercept = run[[9]][1], color="navy", linetype = "dashed", lwd = 1)
 
 
 
