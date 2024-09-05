@@ -4,7 +4,7 @@ Version: 0.0.0.9000
 Authors@R: 
     person("Ash", "Breidenbach", , "lindsay.b.breidenbach@vanderbilt.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3672-1128"))
-Depends: R (>= 3.2.0), rjags, plyr, dplyr, checkmate, magrittr, stringr, utils, stats
+Depends: R (>= 3.5.0), rjags, plyr, dplyr, checkmate, magrittr, stringr, utils, stats
 Suggests: 
     MatchIt,
     ggplot2,
