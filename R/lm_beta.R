@@ -39,6 +39,6 @@ lm_beta = function(exposure, outcome, covariates=NULL, df){
                              p_val = coef(summary(lm1))[2,4],
                              n = nrow(df))
 
-  rownames(regression_df) = "linear_regression"
+  rownames(regression_df) = "regression"
   return(regression_df)
 }

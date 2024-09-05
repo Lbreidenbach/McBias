@@ -45,7 +45,7 @@ odds_ratio = function(exposure, outcome, covariates=NULL, df){
                      n = nrow(df))
 
 
-  row.names(or_df) = "logistic_regression"
+  row.names(or_df) = "regression"
   return(or_df)
 }
 
