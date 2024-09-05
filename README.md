@@ -7,3 +7,7 @@ McBias requires rjags which uses the JAGS library. The installation guide for rj
 https://github.com/cran/rjags/blob/master/INSTALL
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0a7f2874513c56e20368536d5433faf84ddc44b6
