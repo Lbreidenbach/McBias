@@ -16,6 +16,8 @@
 #'
 #' @param n Integer. The number of samples in each data frame
 #'
+#' @param positivity logical. If set to TRUE, checks for positivity violations among binary columns. If violated, it changes the value in the first row of the column to comply with positivity. Defaults to FALSE.
+#'
 #' @param misdiagnosis_v Character value. A \strong{binary} column name in a data frame that the user wishes to set misdiagnosis rates on. Defaults to the column set as the outcome.
 #'
 #' @param under_r double between 0 and 1. The percentage of 1s to be changed to 0s in the column set by misdiagnosis_v

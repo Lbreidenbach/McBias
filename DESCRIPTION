@@ -2,17 +2,10 @@ Package: McBias
 Title: Quantify How Much Bias Impacts Statistical Findings with DAG Theory
 Version: 0.0.0.9000
 Authors@R: 
-    person("Ash", "Breidenbach", , "lindsay.b.breidenbach@vanderbilt.edu", role = c("aut", "cre"),
+    person("Ash", "Breidenbach", email = "lindsay.b.breidenbach@vanderbilt.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3672-1128"))
-Depends: R (>= 3.5.0), rjags, plyr, dplyr, checkmate, magrittr, stringr, utils, stats
+Depends: R (>= 3.2.0), rjags, plyr, dplyr, checkmate, magrittr, stringr, utils, stats, ggplot2, gtable, grid, ggridges, knitr, rmarkdown,  MatchIt
 Suggests: 
-    MatchIt,
-    ggplot2,
-    gtable,
-    grid,
-    ggridges,
-    knitr,
-    rmarkdown
 Description: McBias uses DAG theory to model biases and uses MCMC simulations to quantify how much they will affect final test statistics. It accomplishes this in a four step process. First the user sets all node distributions and arc effect sizes in the DAG, which creates a Bayesian network (BN). From this, the r package simulates datasets where the true effect sizes, prevalences, and means for all variables are known. The package then analyzes and stratifies the datasets as set by the user. Finally, the package outputs a matrix which contains the true effect size, the effect size estimate, and other summary statistics from the given analysis. From there the package provides functions for calculating total bias and other metrics, as well as for data visualization.
 License: `use_mit_license()`
 Encoding: UTF-8

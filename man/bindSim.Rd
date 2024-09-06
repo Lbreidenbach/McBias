@@ -28,34 +28,23 @@ can be bound together.  Subsequently, the multiple runs are bound
 together.  Lastly, the factors are relabeled, if requested.
 }
 \examples{
-#' data(PE, package="McBias")
-Net <- HydeNetwork(~ wells +
-                     pe | wells +
-                     d.dimer | pregnant*pe +
-                     angio | pe +
-                     treat | d.dimer*angio +
-                     death | pe*treat,
-                     data = PE)
+#creates the causal diagram
+my_dag = HydeNetwork(~B|A + C|A + D|B*C)
 
+#adds set effect sizes and distributions to the causal diagram
+my_dag = setNode(my_dag, A, nodeType = "dbern", prob = 0.5)
+my_dag = setNode(my_dag, B, nodeType = "dnorm", mu = paste0(0.2," * A + ",0 - 0.2*0.5), tau = 1)
+my_dag = setNode(my_dag, C, nodeType = "dbern", prob = paste0("ilogit(",0.8," * A + ",set_p(0.9, 0.8*0.5),")"))
+my_dag = setNode(my_dag, D, nodeType = "dbern", prob = paste0("ilogit(",0.05," * B + ", 1.2," * C + ",set_p(0.25, 1.2 * 0.9 + 0.05 * 0 ),")"))
 
-compiledNet <- compileJagsModel(Net, n.chains=5)
+#ScenarioMatrix object
+ideal_run = varied_runs(runs = 100, dag = my_dag, exposure = "B", outcome = "C", covariates = "A", n = 1000)
 
-#* Generate the simulated distribution
-Simulated <- HydeSim(compiledNet,
-                     variable.names = c("d.dimer", "death"),
-                     n.iter=1000)
+#Gives a dataframe of values for quantifying the bias and its effects on the reject null rate
+beta_summary(ideal_run)
 
-Bound <- bindSim(Simulated)
-
-#* Bind a Decision Network
-#* Note: angio shouldn't really be a decision node.
-#*       We use it here for illustration
-Net <- setDecisionNodes(Net, angio, treat)
-compiledDecision <- compileDecisionModel(Net, n.chains=5)
-SimulatedDecision <- HydeSim(compiledDecision,
-                             variable.names = c("d.dimer", "death"),
-                             n.iter = 1000)
-
+#Creates a ridgeline plot to help with bias and coverage visualization
+ci_ridges(ideal_run)
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

@@ -35,13 +35,13 @@ x_prev_2
 y_effect_estimate_2
 
 #If positivity = TRUE the program will make sure each binary column has both 0s and 1s
-positivity_violation_1 = create_data(flex_dag, 10, x = .000001, y = 1)
-positivity_restored_1 = create_data(flex_dag, 10, positivity = T, x = .00001, y = 1)
-positivity_violation_1
-positivity_restored_1
+#positivity_violation_1 = create_data(flex_dag, 10, x = .000001, y = 1)
+#positivity_restored_1 = create_data(flex_dag, 10, positivity = TRUE, x = .00001, y = 1)
+#positivity_violation_1
+#positivity_restored_1
 
-positivity_violation_2 = create_data(flex_dag, 10, x = .999999, y = 1)
-positivity_restored_2 = create_data(flex_dag, 10, positivity = T, x = .99999, y = 1)
-positivity_violation_2
-positivity_restored_2
+#positivity_violation_2 = create_data(flex_dag, 10, x = .999999, y = 1)
+#positivity_restored_2 = create_data(flex_dag, 10, positivity = TRUE, x = .99999, y = 1)
+#positivity_violation_2
+#positivity_restored_2
 

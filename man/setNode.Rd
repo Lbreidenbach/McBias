@@ -201,22 +201,23 @@ proper JAGS code (barring any bugs, of course).
 }
 
 \examples{
-data(PE, package="McBias")
-Net <- HydeNetwork(~ wells +
-                     pe | wells +
-                     d.dimer | pregnant*pe +
-                     angio | pe +
-                     treat | d.dimer*angio +
-                     death | pe*treat,
-                     data = PE)
-print(Net, d.dimer)
+#creates the causal diagram
+my_dag = HydeNetwork(~B|A + C|A + D|B*C)
 
-#* Manually change the precision
-Net <- setNode(Net, d.dimer, nodeType='dnorm', mean=fromFormula(), sd=sqrt(2.65),
-                  nodeFormula = d.dimer ~ pregnant * pe,
-                  nodeFitter='lm')
-print(Net, d.dimer)
+#adds set effect sizes and distributions to the causal diagram
+my_dag = setNode(my_dag, A, nodeType = "dbern", prob = 0.5)
+my_dag = setNode(my_dag, B, nodeType = "dnorm", mu = paste0(0.2," * A + ",0 - 0.2*0.5), tau = 1)
+my_dag = setNode(my_dag, C, nodeType = "dbern", prob = paste0("ilogit(",0.8," * A + ",set_p(0.9, 0.8*0.5),")"))
+my_dag = setNode(my_dag, D, nodeType = "dbern", prob = paste0("ilogit(",0.05," * B + ", 1.2," * C + ",set_p(0.25, 1.2 * 0.9 + 0.05 * 0 ),")"))
 
+#ScenarioMatrix object
+ideal_run = varied_runs(runs = 100, dag = my_dag, exposure = "B", outcome = "C", covariates = "A", n = 1000)
+
+#Gives a dataframe of values for quantifying the bias and its effects on the reject null rate
+beta_summary(ideal_run)
+
+#Creates a ridgeline plot to help with bias and coverage visualization
+ci_ridges(ideal_run)
 }
 \author{
 Jarrod Dalton and Benjamin Nutter

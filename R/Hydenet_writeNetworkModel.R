@@ -16,21 +16,7 @@
 #'
 #' @seealso \code{\link{writeJagsModel}}, \code{\link{writeJagsFormula}}
 #'
-#' @examples
-#' data(PE, package='McBias')
-#' Net <- HydeNetwork(~ wells +
-#'                      pe | wells +
-#'                      d.dimer | pregnant*pe +
-#'                      angio | pe +
-#'                      treat | d.dimer*angio +
-#'                      death | pe*treat,
-#'                      data = PE)
-#'
-#' #* Default printing
-#' writeNetworkModel(Net)
-#'
-#' #* Something a little easier on the eyes.
-#' writeNetworkModel(Net, pretty=TRUE)
+#' @example examples/create_data_example.R
 #'
 
 writeNetworkModel <- function(network, pretty=FALSE)

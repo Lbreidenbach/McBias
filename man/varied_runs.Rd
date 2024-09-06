@@ -36,6 +36,8 @@ varied_runs(
 
 \item{n}{Integer. The number of samples in each data frame}
 
+\item{positivity}{logical. If set to TRUE, checks for positivity violations among binary columns. If violated, it changes the value in the first row of the column to comply with positivity. Defaults to FALSE.}
+
 \item{misdiagnosis_v}{Character value. A \strong{binary} column name in a data frame that the user wishes to set misdiagnosis rates on. Defaults to the column set as the outcome.}
 
 \item{under_r}{double between 0 and 1. The percentage of 1s to be changed to 0s in the column set by misdiagnosis_v}
@@ -102,13 +104,14 @@ ci_ridges(confounder_comp, title = "How well is the confounder adjusted for?", s
 beta_summary(confounder_comp)
 
 #You can also use reparse_runs() to only look at one method in particular.
-logistic_comp = reparse_runs(list(small_conf_naive, small_conf_adj, large_conf_naive, large_conf_adj), method = "logistic_regression", list_names =  c("A->C = 1, naive", "A->C = 1, confounder adjusted", "A->C = 3, naive", "A->C = 3, confounder adjusted"))
+logistic_comp = reparse_runs(list(small_conf_naive, small_conf_adj, large_conf_naive, large_conf_adj), method = "regression", list_names =  c("A->C = 1, naive", "A->C = 1, confounder adjusted", "A->C = 3, naive", "A->C = 3, confounder adjusted"))
 ci_ridges(logistic_comp, "How well is the confounder adjusted for?", subtitle = "Comparison of logistic regression across different confounder strengths")
 
 
 #if a beta value between 2 binary nodes is too large, or the sample size is too small, one node may become completely predictive of another which violates separation.
-#An error will occur if this is the case
-very_large_conf = varied_runs(200, flex_dag, exposure = "B", outcome = "C",  n = 10000, x = .5, y = 100)
+#An error will occur if this is the case:
+
+# very_large_conf = varied_runs(200, flex_dag, exposure = "B", outcome = "C",  n = 10000, x = .5, y = 100)
 }
 \seealso{
 \code{\link[=apply_methods]{apply_methods()}},\code{\link[=ci_ridges]{ci_ridges()}},\code{\link[=beta_summary]{beta_summary()}}, \code{\link[=reparse_runs]{reparse_runs()}}

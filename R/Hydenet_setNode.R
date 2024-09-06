@@ -155,24 +155,7 @@
 #'
 #' @author Jarrod Dalton and Benjamin Nutter
 #'
-#' @examples
-#' data(PE, package="McBias")
-#' Net <- HydeNetwork(~ wells +
-#'                      pe | wells +
-#'                      d.dimer | pregnant*pe +
-#'                      angio | pe +
-#'                      treat | d.dimer*angio +
-#'                      death | pe*treat,
-#'                      data = PE)
-#' print(Net, d.dimer)
-#'
-#' #* Manually change the precision
-#' Net <- setNode(Net, d.dimer, nodeType='dnorm', mean=fromFormula(), sd=sqrt(2.65),
-#'                   nodeFormula = d.dimer ~ pregnant * pe,
-#'                   nodeFitter='lm')
-#' print(Net, d.dimer)
-#'
-
+#' @example examples/Dag_example.R
 setNode <- function(network, node, nodeType,
                     nodeFitter, nodeFormula,
                     fitterArgs = list(),

@@ -23,21 +23,7 @@
 #' (or if too few coefficients have been given), the vector of names is supplied.
 #'
 #' @author Jarrod Dalton and Benjamin Nutter
-#' @examples
-#' data(PE, package="McBias")
-#' Net <- HydeNetwork(~ wells +
-#'                      pe | wells +
-#'                      d.dimer | pregnant*pe +
-#'                      angio | pe +
-#'                      treat | d.dimer*angio +
-#'                      death | pe*treat)
-#'
-#' expectedVariables(Net, wells)
-#' expectedVariables(Net, treat)
-#' expectedVariables(Net, treat, returnVector=TRUE)
-#'
-#' expectedParameters(Net, wells)
-#' expectedParameters(Net, wells, returnVector=TRUE)
+#' @example examples/Dag_example.R
 
 expectedVariables <- function(network, node, returnVector=FALSE)
 {
