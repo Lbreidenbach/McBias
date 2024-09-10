@@ -14,12 +14,12 @@
 #' }
 
 
-t2d_dag = HydeNet::HydeNetwork(~PAD|DM + CHD|DM*WC*SBP + DM|rs7903146*SBP*WC + WC|BMI + SBP|BMI)
-t2d_dag = HydeNet::setNode(t2d_dag, PAD, nodeType = "dbern", prob = paste0("ilogit(",.7," * DM + ", -1.339663,")"))
-t2d_dag = HydeNet::setNode(t2d_dag, DM, nodeType = "dbern", prob = paste0("ilogit(",0.21," * WC + ", 0.055," * SBP + ", 0.36," * rs7903146 + ", -16.8671269607129,")"))
-t2d_dag = HydeNet::setNode(t2d_dag, CHD, nodeType = "dbern", prob = paste0("ilogit(",1," * DM + ", 0.029," * WC + ", 0.027," * SBP + ", -6.13999741241117,")"))
-t2d_dag = HydeNet::setNode(t2d_dag, rs7903146, nodeType = "dbern", prob = paste0("ilogit(", -1.208311,")"))
-t2d_dag = HydeNet::setNode(t2d_dag, WC, nodeType = "dnorm", mu = paste0(0.821," * BMI + ",39.6 - 0.821*28.7), tau = 0.253)
-t2d_dag = HydeNet::setNode(t2d_dag, SBP, nodeType = "dnorm", mu = paste0(0.148," * BMI + ",122 - .148*28.7), tau = 0.267)
-t2d_dag = HydeNet::setNode(t2d_dag, BMI, nodeType = "dnorm", mu = paste0(28.7), tau = 0.447)
+t2d_dag = HydeNetwork(~PAD|DM + CHD|DM*WC*SBP + DM|rs7903146*SBP*WC + WC|BMI + SBP|BMI)
+t2d_dag = setNode(t2d_dag, PAD, nodeType = "dbern", prob = paste0("ilogit(",.7," * DM + ", -1.339663,")"))
+t2d_dag = setNode(t2d_dag, DM, nodeType = "dbern", prob = paste0("ilogit(",0.21," * WC + ", 0.055," * SBP + ", 0.36," * rs7903146 + ", -16.8671269607129,")"))
+t2d_dag = setNode(t2d_dag, CHD, nodeType = "dbern", prob = paste0("ilogit(",1," * DM + ", 0.029," * WC + ", 0.027," * SBP + ", -6.13999741241117,")"))
+t2d_dag = setNode(t2d_dag, rs7903146, nodeType = "dbern", prob = paste0("ilogit(", -1.208311,")"))
+t2d_dag = setNode(t2d_dag, WC, nodeType = "dnorm", mu = paste0(0.821," * BMI + ",39.6 - 0.821*28.7), tau = 0.253)
+t2d_dag = setNode(t2d_dag, SBP, nodeType = "dnorm", mu = paste0(0.148," * BMI + ",122 - .148*28.7), tau = 0.267)
+t2d_dag = setNode(t2d_dag, BMI, nodeType = "dnorm", mu = paste0(28.7), tau = 0.447)
 
