@@ -163,7 +163,7 @@ setNode <- function(network, node, nodeType,
                     utility = "current",
                     fromData=!is.null(network$data), ...,
                     nodeData = NULL, factorLevels = NULL,
-                    validate=TRUE, fitModel=getOption("Hyde_fitModel"),
+                    validate=TRUE, fitModel=getOption("Hyde_fitModel", default = FALSE),
                     policyValues = factorLevels)
 {
 
