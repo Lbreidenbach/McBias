@@ -136,7 +136,7 @@ HydeNetwork.formula <- function(nodes, data=NULL, ...)
   names(nodeType) <- node_names
 
   #* nodeParameters
-  data(jagsDists, envir=environment())
+  data(jagsDists)
   nodeParams <- lapply(X = node_names,
                        FUN = HydeNetwork_nodeParams,
                        jagsDists = jagsDists,
