@@ -5,15 +5,10 @@ date: "2024-03-05"
 output: html_document
 ---
 ```{r,echo=FALSE, message=FALSE}
-library(rjags)
-library(plyr)
-library(dplyr)
-library(MatchIt)
-library(ggplot2)
-library(gtable)
-library(grid)
-library(ggridges)
+
 library(McBias)
+library(ggplot2)
+library(grid)
 
 data("vignette_data")
 
@@ -35,8 +30,14 @@ To begin we must set our DAG object. Our DAG object must not have bidirectional 
 #Start each Hydenetwork argurment with ~
 
 my_dag = HydeNetwork(~B|A + C|A + D|B*C)
-plot(my_dag)
+
 ```
+This creates the following DAG       
+
+
+&nbsp;↙A↘   
+B &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C      
+&nbsp;↘D↙ 
 
 ## Step 2 - Add distributions to your DAG
 
