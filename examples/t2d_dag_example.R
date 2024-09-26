@@ -16,13 +16,13 @@ t2d_dag = setNode(t2d_dag, rs7903146, nodeType = "dbern", prob = paste0("ilogit(
 #intercept calculated as log(0.23/(1-0.23)) = -1.208311
 
 t2d_dag = setNode(t2d_dag, WC, nodeType = "dnorm", mu = paste0(0.821," * BMI + ",39.6 - 0.821*28.7), tau = 0.004109139)
-#intercept directly calculated in code
+#intercept directly calculated in code, tau is the Gaussian distribution's precision. Precision = 1/variance = 1/(sd^2)
 
 t2d_dag = setNode(t2d_dag, SBP, nodeType = "dnorm", mu = paste0(0.148," * BMI + ",122 - .148*28.7), tau =  0.005102041)
-#intercept directly calculated in code
+#intercept directly calculated in code, tau = precision = 1/variance = 1/(sd^2)
 
 t2d_dag = setNode(t2d_dag, BMI, nodeType = "dnorm", mu = 28.7, tau = 0.04)
-#BMI is an independent node, mean is directly input
+#BMI is an independent node, mean is directly input, tau = precision = 1/variance = 1/(sd^2)
 
 ####
 
