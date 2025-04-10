@@ -5,7 +5,7 @@ beta_sum = function(run, a=0.05){
   #call needed data
 
 
-  ate = run[[9]][2]
+  ate = unique(as.numeric(run[[9]]))
   calc_ate = as.data.frame(run[[2]])
   lower_int = as.data.frame(run[[3]])
   upper_int = as.data.frame(run[[4]])

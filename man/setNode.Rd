@@ -20,7 +20,7 @@ setNode(
   nodeData = NULL,
   factorLevels = NULL,
   validate = TRUE,
-  fitModel = getOption("Hyde_fitModel"),
+  fitModel = getOption("Hyde_fitModel", default = FALSE),
   policyValues = factorLevels
 )
 
