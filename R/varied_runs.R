@@ -28,6 +28,8 @@
 #'
 #' @param match_methods Character value/vector. The method(s) in which distance between a matched case and control is measured as specified by MatchIt. Defaults to NULL which does no matching analysis.
 #'
+#' @param family Calls a more specific regression by passing the arguement into stats::glm() family arguement
+#'
 #' @param ... If the DAG has any unset variables, define them here
 #'
 #' @return A list of 11 elements with each element bulleted below in order
@@ -52,7 +54,7 @@
 #'
 
 
-varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n=10000, positivity = F, misdiagnosis_v = outcome, under_r = 0, over_r = 0, ratio=1, match_methods = NULL, ...){
+varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n=10000, positivity = F, misdiagnosis_v = outcome, under_r = 0, over_r = 0, ratio=1, match_methods = NULL, family = gaussian, ...){
   randomize = function(variable, rmodel){
     if(is.null(variable) == TRUE){
       variable = rmodel
@@ -88,7 +90,7 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
   #FIX DIMENSION PROBLEM
   temp_df = lapply(c(1:runs), function(x) create_data(dag, value_df[x,1], positivity = positivity, ...))
   temp_df = lapply(c(1:runs), function(x) misdiagnosis(temp_df[[x]], misdiagnosis_v, under_r[x], over_r[x]))
-  temp_output = lapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods)
+  temp_output = lapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods, family)
 
   one_dim = FALSE
   if(names(temp_output[[1]])[1]=="apply(tot_df, 2, unlist)"){

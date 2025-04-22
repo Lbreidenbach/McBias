@@ -11,6 +11,8 @@
 #'
 #' @param df The data frame for analysis
 #'
+#' @param family Calls a more specific regression by passing the arguement into stats::glm() family arguement
+#'
 #' @return A six column data frame with the following summary statistics:
 #' * odds ratio (reads NA)
 #' * beta coeffecient
@@ -24,12 +26,12 @@
 #'@export
 #'
 
-lm_beta = function(exposure, outcome, covariates=NULL, df){
+lm_beta = function(exposure, outcome, covariates=NULL, df, family = gaussian){
   vars = c(exposure, covariates)
-  lm1 = stats::lm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df)
+  lm1 = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, family = family)
   confint = confint(lm1, parm = exposure, trace = F)
-  upper_int = confint[1,2]
-  lower_int = confint[1,1]
+  upper_int = confint[2]
+  lower_int = confint[1]
   beta = as.numeric(lm1$coefficients[2])
   regression_df = data.frame("odds_ratio" = NA,
                              beta = beta,

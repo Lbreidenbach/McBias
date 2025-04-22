@@ -17,6 +17,8 @@
 #'
 #' @param match_methods Character value/vector. The method(s) in which distance between a matched case and control is measured as specified by MatchIt. Defaults to NULL which does no matching analysis.
 #'
+#' @param family Calls a more specific regression by passing the arguement into stats::glm() family arguement
+#'
 #' @return A six column data frame of n rows where n is the number of different methods run. The columns represent the following summary statistics:
 #' * odds ratio
 #' * beta (log odds)
@@ -32,7 +34,7 @@
 
 
 
-apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=1, match_methods = NULL){
+apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=1, match_methods = NULL, family = gaussian){
   re = function(df, name){
     rownames(df) = name
     return(df)
@@ -78,7 +80,7 @@ apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=
 
   #lm beta quals
   if(class(df[,outcome])=="numeric"){
-    tot_df = tot_bind(list(tot_df, lm_beta(exposure, outcome, covariates, df)))
+    tot_df = tot_bind(list(tot_df, lm_beta(exposure, outcome, covariates, df, family)))
   }
 
   #ps weighting quals
