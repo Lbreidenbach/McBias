@@ -1,7 +1,7 @@
 # McBias
 McBias is an r package that utilizes Monte Carlo simulations to help estimate the effects of bias found in datasets of convenience
 
-**NOTE: McBias requires JAGS to be installed separately <ins>outside</ins> of R! 
+**NOTE: McBias uses rjags which requires the JAGS library to be installed separately <ins>outside</ins> of R!** 
 
 Installation:
 
