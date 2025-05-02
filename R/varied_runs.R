@@ -28,7 +28,7 @@
 #'
 #' @param match_methods Character value/vector. The method(s) in which distance between a matched case and control is measured as specified by MatchIt. Defaults to NULL which does no matching analysis.
 #'
-#' @param family Calls a more specific regression by passing the arguement into stats::glm() family arguement
+#' @param family Calls a more specific regression by passing the arguement into stats::glm() family argument
 #'
 #' @param ... If the DAG has any unset variables, define them here
 #'
@@ -82,43 +82,43 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
   outcome_val = grep(exposure, outcome_eq, value = T)
   outcome_val = gsub(exposure, 1, outcome_val)
   outcome_val = gsub("[[:alpha:]]", "0", outcome_val)
-  ate = sum(unlist(lapply(outcome_val, function(x) eval(parse(text = x)))))
+  ate = sum(unlist(mclapply(outcome_val, function(x) eval(parse(text = x)))))
 
 
-  #temp_dag = lapply(c(1:runs), function(x) make_model(dag, value_df[x,1], value_df[x,3], value_df[x,4]))
+  #temp_dag = mclapply(c(1:runs), function(x) make_model(dag, value_df[x,1], value_df[x,3], value_df[x,4]))
 
   #FIX DIMENSION PROBLEM
   temp_df = lapply(c(1:runs), function(x) create_data(dag, value_df[x,1], positivity = positivity, ...))
-  temp_df = lapply(c(1:runs), function(x) misdiagnosis(temp_df[[x]], misdiagnosis_v, under_r[x], over_r[x]))
-  temp_output = lapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods, family)
+  temp_df = mclapply(c(1:runs), function(x) misdiagnosis(temp_df[[x]], misdiagnosis_v, under_r[x], over_r[x]))
+  temp_output = mclapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods, family)
 
   one_dim = FALSE
   if(names(temp_output[[1]])[1]=="apply(tot_df, 2, unlist)"){
-    temp_output = lapply(1:runs,function(x) t(temp_output[[x]]))
+    temp_output = mclapply(1:runs,function(x) t(temp_output[[x]]))
     one_dim = TRUE
   }
 
   if(class(temp_df[[1]][,outcome])=="integer"){
-    out_p = unlist(lapply(c(1:runs), function(x) sum(temp_df[[x]][,outcome])/nrow(temp_df[[x]])))
+    out_p = unlist(mclapply(c(1:runs), function(x) sum(temp_df[[x]][,outcome])/nrow(temp_df[[x]])))
 
   }else{
     out_p=rep(NA, runs)
 
   }
   if(class(temp_df[[1]][,exposure])=="integer"){
-    exp_p = unlist(lapply(c(1:runs), function(x) sum(temp_df[[x]][,exposure])/nrow(temp_df[[x]])))
-    #mde = unlist(lapply(c(1:runs), function(x) sum(temp_df[[x]][,outcome])/nrow(temp_df[[x]])))
-    #unlist(lapply(colnames(x_val), function(x) 0.02*sqrt(1 / (run[[3]][,x]*(1 - run[[3]][,x])*run[[5]][,x] ) )))
+    exp_p = unlist(mclapply(c(1:runs), function(x) sum(temp_df[[x]][,exposure])/nrow(temp_df[[x]])))
+    #mde = unlist(mclapply(c(1:runs), function(x) sum(temp_df[[x]][,outcome])/nrow(temp_df[[x]])))
+    #unlist(mclapply(colnames(x_val), function(x) 0.02*sqrt(1 / (run[[3]][,x]*(1 - run[[3]][,x])*run[[5]][,x] ) )))
   }else{
     exp_p=rep(NA, runs)
     #mde=rep(NA, runs)
   }
-  temp_output =lapply(c(1:runs), function(x) cbind(temp_output[[x]], exp_prev = rep(exp_p[x], nrow(temp_output[[x]]))))
-  temp_output =lapply(c(1:runs), function(x) cbind(temp_output[[x]], out_prev = rep(out_p[x], nrow(temp_output[[x]]))))
+  temp_output =mclapply(c(1:runs), function(x) cbind(temp_output[[x]], exp_prev = rep(exp_p[x], nrow(temp_output[[x]]))))
+  temp_output =mclapply(c(1:runs), function(x) cbind(temp_output[[x]], out_prev = rep(out_p[x], nrow(temp_output[[x]]))))
   ##FIX SET ATE HERE
-  temp_output =lapply(c(1:runs), function(x) cbind(temp_output[[x]], set_ate = rep(ate, nrow(temp_output[[x]]))))
-  temp_output =lapply(c(1:runs), function(x) cbind(temp_output[[x]], over_r = rep(over_r[x], nrow(temp_output[[x]]))))
-  temp_output =lapply(c(1:runs), function(x) cbind(temp_output[[x]], under_r = rep(under_r[x], nrow(temp_output[[x]]))))
+  temp_output =mclapply(c(1:runs), function(x) cbind(temp_output[[x]], set_ate = rep(ate, nrow(temp_output[[x]]))))
+  temp_output =mclapply(c(1:runs), function(x) cbind(temp_output[[x]], over_r = rep(over_r[x], nrow(temp_output[[x]]))))
+  temp_output =mclapply(c(1:runs), function(x) cbind(temp_output[[x]], under_r = rep(under_r[x], nrow(temp_output[[x]]))))
   partition = laply(temp_output, as.matrix)
   if(one_dim == TRUE){
     partition = list(odds_ratio = partition[, 1],
