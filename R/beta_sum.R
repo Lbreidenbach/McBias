@@ -1,5 +1,8 @@
 #'@noRd
 
+run = run_1
+a = 0.05
+
 beta_sum = function(run, a=0.05){
 
   #call needed data
@@ -47,7 +50,7 @@ beta_sum = function(run, a=0.05){
   sd_beta = sapply(as.list(unique(data$names)), function(x) sd((data %>% dplyr::filter(names == x))[[4]]))
   if(is.null(dim(run[[1]]))==T){
     prop_over_ci = sum(data$over_ci)/length(data$over_ci)
-    prop_under_ci = sum(data$under_ci/length(data$under_ci))
+    prop_under_ci = sum(data$under_ci)/length(data$under_ci)
     beta_bias_mcse =sapply(as.list(unique(data$names)), function(x) sqrt(sum(((data %>% dplyr::filter(names == x))[[4]]-mean_beta)^2) * 1/(n*(n-1))) )
 
   }else{
