@@ -63,36 +63,20 @@ no_r = 500
 
 #Scenario A, rs7903146's effect on body mass index
 
-#a1
-chdpad_bmi = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "BMI" , covariates = c("PAD", "CHD") , sb = NULL , n = no_n)
 
-#a2
+#a1
 naive_bmi = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "BMI" , covariates = NULL , sb = NULL , n = no_n)
 
-#a3
-wcsbp_bmi = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "BMI" , covariates = c("WC", "SBP") , sb = NULL , n = no_n)
-
-#a4
-allbt2d_bmi = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "BMI" , covariates = c("PAD", "CHD", "WC", "SBP") , sb = NULL , n = no_n)
-
-#a5
-all_bmi = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "BMI" , covariates = c("T2D", "PAD", "CHD", "WC", "SBP") , sb = NULL ,  n = no_n)
-
-#a6
+#a2
 t2d_bmi = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "BMI" , covariates = "T2D" , sb = NULL , n = no_n)
 
-#a7
-chdpadt2d_bmi = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "BMI" , covariates = c("PAD", "CHD", "T2D") , sb = NULL , n = no_n)
+#a3
+all_bmi = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "BMI" , covariates = c("T2D", "PAD", "CHD", "WC", "SBP") , sb = NULL ,  n = no_n)
 
-# #qc1
-# qc_1 = varied_runs(no_r, t2d_dag, exposure = "T2D" , outcome = "CHD" , covariates = c("PAD", "CHD") , sb = NULL , n = no_n)
-#
-# #qc2
-# qc_2 = varied_runs(no_r, t2d_dag, exposure = "T2D" , outcome = "CHD" , covariates = c("WC", "SBP") , sb = NULL , n = no_n)
 
 
 bmi_results = reparse_runs(list(naive_bmi, t2d_bmi, all_bmi), "regression",
-                           c("f naive (a2)", "b adjusts t2d (a6)", "c  adjusts all (a5)"))
+                           c("c naive (a1)", "b adjusts t2d (a2)", "a  adjusts all (a3)"))
 
 #Create Scernario A's ridgeline plot
 ci_ridges(bmi_results)
@@ -104,30 +88,18 @@ beta_summary(bmi_results)
 #Scenario B, rs7903146's effect on bmi
 
 #b1
-chdpad_wc = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "WC" , covariates = c("PAD", "CHD") , sb = NULL , n = no_n)
-
-#b2
 naive_wc = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "WC" , covariates = NULL , sb = NULL , n = no_n)
 
-#b3
-bmisbp_wc = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "WC" , covariates = c("BMI", "SBP") , sb = NULL , n = no_n)
-
-#b4
-allbt2d_wc = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "WC" , covariates = c("PAD", "CHD", "BMI", "SBP") , sb = NULL ,  n = no_n)
-
-#b5
-all_wc = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "WC" , covariates = c("T2D", "PAD", "CHD", "BMI", "SBP") , sb = NULL ,  n = no_n)
-
-#b6
+#b2
 t2d_wc = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "WC" , covariates = "T2D" , sb = NULL ,  n = no_n)
 
-#b7
-chdpadt2d_wc = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "WC" , covariates = c("PAD", "CHD", "T2D") , sb = NULL , n = no_n)
+#b3
+all_wc = varied_runs(no_r, t2d_dag, exposure = "rs7903146" , outcome = "WC" , covariates = c("T2D", "PAD", "CHD", "BMI", "SBP") , sb = NULL ,  n = no_n)
 
 wc_results = reparse_runs(list(naive_wc, t2d_wc, all_wc), "regression",
-                          c("f  naive (b2)",
-                            "b adjusts t2d (b6)",
-                            "c  adjusts all (b5)"
+                          c("c  naive (b1)",
+                            "b adjusts t2d (b2)",
+                            "a  adjusts all (b3)"
                            ))
 
 #Create Scernario B's ridgeline plot
