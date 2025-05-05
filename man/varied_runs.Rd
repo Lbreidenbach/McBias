@@ -18,6 +18,7 @@ varied_runs(
   over_r = 0,
   ratio = 1,
   match_methods = NULL,
+  family = gaussian,
   ...
 )
 }
@@ -47,6 +48,8 @@ varied_runs(
 \item{ratio}{Integer. number of controls that should be matched to each case. Defaults to 1}
 
 \item{match_methods}{Character value/vector. The method(s) in which distance between a matched case and control is measured as specified by MatchIt. Defaults to NULL which does no matching analysis.}
+
+\item{family}{Calls a more specific regression by passing the arguement into stats::glm() family argument}
 
 \item{...}{If the DAG has any unset variables, define them here}
 }

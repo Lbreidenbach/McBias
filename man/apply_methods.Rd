@@ -11,7 +11,8 @@ apply_methods(
   sb = NULL,
   df,
   ratio = 1,
-  match_methods = NULL
+  match_methods = NULL,
+  family = gaussian
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ apply_methods(
 \item{ratio}{Integer. number of controls that should be matched to each case. Defaults to 1}
 
 \item{match_methods}{Character value/vector. The method(s) in which distance between a matched case and control is measured as specified by MatchIt. Defaults to NULL which does no matching analysis.}
+
+\item{family}{Calls a more specific regression by passing the arguement into stats::glm() family arguement}
 }
 \value{
 A six column data frame of n rows where n is the number of different methods run. The columns represent the following summary statistics:

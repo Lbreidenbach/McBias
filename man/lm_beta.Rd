@@ -4,7 +4,7 @@
 \alias{lm_beta}
 \title{Analyzes a data frame to give an odds ratio}
 \usage{
-lm_beta(exposure, outcome, covariates = NULL, df)
+lm_beta(exposure, outcome, covariates = NULL, df, family = gaussian)
 }
 \arguments{
 \item{exposure}{Character value. The name of a column in a data frame that represents exposure in an}
@@ -14,6 +14,8 @@ lm_beta(exposure, outcome, covariates = NULL, df)
 \item{covariates}{Character value/vector. The name(s) of the columns that the user wants adjust on.}
 
 \item{df}{The data frame for analysis}
+
+\item{family}{Calls a more specific regression by passing the arguement into stats::glm() family arguement}
 }
 \value{
 A six column data frame with the following summary statistics:
