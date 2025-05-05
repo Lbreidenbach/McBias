@@ -1,8 +1,5 @@
 #'@noRd
 
-run = run_1
-a = 0.05
-
 beta_sum = function(run, a=0.05){
 
   #call needed data
