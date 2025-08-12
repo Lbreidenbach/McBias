@@ -149,38 +149,46 @@ ci_ridges = function(run, title =NULL, subtitle=NULL){
 
 
   # Construct the six grobs - three symbols and three labels
-  L1 = grid::rectGrob(height = .5, width = .5, gp = gpar(fill = "lightblue2", col = NA))
-  L2 = grid::rectGrob(height = .5, width = .5, gp = gpar(fill = "grey50", col = NA))
-  T1 = grid::textGrob("Yes", x = .2, just = "left")
-  T2 = grid::textGrob("No", x = .2, just = "left")
+  L1 = grid::rectGrob(height = 0.8, width = 0.8, y=.41,gp = gpar(fill = "lightblue2", col = "black", lwd = 2))
+  L2 = grid::rectGrob(height = 0.8, width = 0.8,y=.41, gp = gpar(fill = "grey50",  col = "black", lwd = 2))
+  L3 = grid::linesGrob(x = unit(c(0.05, 0.9), "npc"), y = unit(c(.3, .3), "npc"), gp = gpar( col = "navy", lwd = 3.8, lty = "dashed"))
+  T1 = grid::textGrob("= Yes", x = 0, just = "left",y=.4,gp = gpar(fontsize=10))
+  T2 = grid::textGrob("= No", x = 0, just = "left",y=.4, gp = gpar(fontsize=10))
+  T3 = grid::textGrob("Set true effect size =", x = .36,y=.3, just = "left",gp = gpar(fontsize=10, fontface = "bold"))
 
 
   # Construct a gtable - 2 columns X 4 rows
-  leg = gtable::gtable(width = unit(c(1,1), "cm"), height = unit(c(1.8,1,1), "cm"))
+  leg = gtable::gtable(width = unit(c(5.4,.8,1,.8,1), "cm"), height = unit(c(1,.7), "cm"))
 
+  #gtable_show_layout(leg)
   # Place the six grob into the table
-  leg = gtable::gtable_add_grob(leg, L1, t=2, l=1)
-  leg = gtable::gtable_add_grob(leg, L2, t=3, l=1)
-  leg = gtable::gtable_add_grob(leg, T1, t=2, l=2)
-  leg = gtable::gtable_add_grob(leg, T2, t=3, l=2)
+  leg = gtable::gtable_add_grob(leg, L1, t=1, l=2)
+  leg = gtable::gtable_add_grob(leg, L2, t=1, l=4)
+  leg = gtable::gtable_add_grob(leg, L3, t=2,l=2, r=5)
+  leg = gtable::gtable_add_grob(leg, T1, t=1, l=3)
+  leg = gtable::gtable_add_grob(leg, T2, t=1, l=5)
+  leg = gtable::gtable_add_grob(leg, T3, t=2,l=1)
+  leg = gtable::gtable_add_grob(leg, grid::textGrob(expression(bold("Does effect size estimate have\ntrue effect size in its 95% C.I.?")), vjust = 1.2,gp = gpar(fontsize=10),y=.4 ), t=1,l=1)
+
 
   # Give it a title (if needed)
-  leg = gtable::gtable_add_grob(leg, grid::textGrob(expression(bold("True B in\n95% CI?")), vjust = 2), t=1, l=1, r=2)
-  #leg = gtable_add_grob(leg, textGrob(expression(bold("95% CI?"))), t=2, l=1, r=2)
+
+
   # Get the ggplot grob for plot1
   g = ggplot2::ggplotGrob(r)
-
+  gtable_show_layout(g)
   # Get the position of the panel,
   # add a column to the right of the panel,
   # put the legend into that column,
   # and then add another spacing column
   pos = g$layout[grepl("panel", g$layout$name), c('t', 'l')]
-  g = gtable::gtable_add_cols(g, sum(leg$widths), pos$l)
-  g = gtable::gtable_add_grob(g, leg, t = pos$t, l = pos$l + 1)
-  g = gtable::gtable_add_cols(g, unit(6, "pt"), pos$l)
+  g = gtable::gtable_add_rows(g, sum(leg$heights), pos$t +2 )
+  g = gtable::gtable_add_grob(g, leg, t = pos$t +3, l=pos$l-1,r = pos$l)
+
 
   # Draw it
   grid::grid.newpage()
+  grid::grid.draw(g)
   return(grid::grid.draw(g))
 
 }

@@ -13,8 +13,8 @@
 #'
 #' @docType data
 #' @keywords data
-#' @name "UseCase1Results.RData"
-#' @usage load(UseCase1Results)
+#' @name UseCase1Results.RData
+#' @usage load("UseCase1Results.RData")
 #' @format Two list outputs from reparse_runs() with 11 elements where each element is a 2 dimensional matrix of 500x3 where each column represents each of the 3 adjustment sets and each row represents the calculation for each of the 500 iterations
 #' \describe{
 #'   \item{ratio}{Odds ratio. Reads as NA since the ouctome is continuous}
@@ -45,8 +45,8 @@ NULL
 #'
 #' @docType data
 #' @keywords data
-#' @name "UseCase2Results.RData"
-#' @usage load(UseCase2Results)
+#' @name UseCase2Results.RData
+#' @usage load("UseCase2Results.RData")
 #' @format Two list outputs from reparse_runs() with 11 elements where each element is a 2 dimensional matrix of 500x3 where each column represents each of the 3 adjustment sets and each row represents the calculation for each of the 500 iterations
 #' \describe{
 #'   \item{ratio}{Odds ratio. Reads as NA since the ouctome is continuous}
