@@ -11,7 +11,7 @@ make_model = function(dag, ...){
     dag_1 = do.call(dag, arg_list)
   }
 
-  writeNetworkModel(dag_1, pretty = TRUE)
+  #writeNetworkModel(dag_1, pretty = TRUE)
   comp_dag = compileJagsModel(dag_1)
   return(comp_dag)
 }

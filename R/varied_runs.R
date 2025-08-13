@@ -87,9 +87,14 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
 
   #temp_dag = mclapply(c(1:runs), function(x) make_model(dag, value_df[x,1], value_df[x,3], value_df[x,4]))
 
-  #FIX DIMENSION PROBLEM
+  #
+  cat("Creating simulated data...\n")
+  sink(nullfile())    # suppress output
   temp_df = lapply(c(1:runs), function(x) create_data(dag, value_df[x,1], positivity = positivity, ...))
+  sink()
+
   temp_df = mclapply(c(1:runs), function(x) misdiagnosis(temp_df[[x]], misdiagnosis_v, under_r[x], over_r[x]))
+  cat("Analyzing simulated data...")
   temp_output = mclapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods, family)
 
   one_dim = FALSE

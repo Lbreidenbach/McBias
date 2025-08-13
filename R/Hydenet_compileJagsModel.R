@@ -37,6 +37,7 @@ compileJagsModel <- function(network, data=NULL, ...)
   #* file for compileDecisionModel
 
   con <- textConnection(writeNetworkModel(network))
+
   jags <-
     rjags::jags.model(
       file = con,
@@ -50,6 +51,7 @@ compileJagsModel <- function(network, data=NULL, ...)
       {
         c(data, cpt_arrays)
       },
+      quiet = TRUE,
       ...
     )
 

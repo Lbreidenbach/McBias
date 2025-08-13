@@ -1,11 +1,11 @@
 #The below code creates the use case DAG####
-t2d_dag = HydeNet::HydeNetwork(~PAD|T2D + CHD|T2D*WC*SBP + T2D|rs7903146*SBP*WC + WC|BMI + SBP|BMI)
+t2d_dag = HydeNetwork(~PAD|T2D + CHD|T2D*WC*SBP + T2D|rs7903146*SBP*WC + WC|BMI + SBP|BMI)
 
 #The below code sets the distributions and effect sizes of the nodes and edges
-t2d_dag = HydeNet::setNode(t2d_dag, PAD, nodeType = "dbern", prob = paste0("ilogit(",.7," * T2D + ", set_p(0.225, 0.7*0.147),")"))
+t2d_dag = setNode(t2d_dag, PAD, nodeType = "dbern", prob = paste0("ilogit(",.7," * T2D + ", set_p(0.225, 0.7*0.147),")"))
 #intercept calculated as log(0.225/(1-0.225)) - (0.7*0.147)
 
-t2d_dag = HydeNet::setNode(t2d_dag, T2D, nodeType = "dbern", prob = paste0("ilogit((",0.21," * WC)/15.6 + (", 0.055," * SBP)/14 + ", 0.34," * rs7903146 + ",
+t2d_dag = setNode(t2d_dag, T2D, nodeType = "dbern", prob = paste0("ilogit((",0.21," * WC)/15.6 + (", 0.055," * SBP)/14 + ", 0.34," * rs7903146 + ",
                                                                            set_p(0.147, (0.055*122)/14+(0.21*39.6)/15.6+0.34*0.41),")"))
 #Each beta term is divided by its standard deviation to  scale probability between 0 and 1. This preserves prevalence
 #The intercept, set by the set_p() is log(0.147/(1-0.147)) - ((0.055*122)/14+(0.21*39.6)/15.6+0.34*0.41)
@@ -13,21 +13,21 @@ t2d_dag = HydeNet::setNode(t2d_dag, T2D, nodeType = "dbern", prob = paste0("ilog
 
 # t2d_dag = setNode(t2d_dag, CHD, nodeType = "dbern", prob = paste0("ilogit(",1," * T2D + ", 0.029," * WC + ", 0.02," * SBP + ", set_p(0.175, 1*0.147 + 0.029 * 39.600 + 0.02*122),")"))
 
-t2d_dag = HydeNet::setNode(t2d_dag, CHD, nodeType = "dbern", prob = paste0("ilogit(",1," * T2D + (", 0.029," * WC)/15.6 + (", 0.027," * SBP)/14 + ",
+t2d_dag = setNode(t2d_dag, CHD, nodeType = "dbern", prob = paste0("ilogit(",1," * T2D + (", 0.029," * WC)/15.6 + (", 0.027," * SBP)/14 + ",
                                                                            set_p(0.175,(0.027*122)/14+(0.029*39.6)/15.6+1*0.147),")"))
 
 #Each beta term is divided by its standard deviation to  scale probability between 0 and 1. This preserves prevalence
 
-t2d_dag = HydeNet::setNode(t2d_dag, rs7903146, nodeType = "dbern", prob = 0.27)
+t2d_dag = setNode(t2d_dag, rs7903146, nodeType = "dbern", prob = 0.27)
 #probability directly set bc it's not dependent on any other nodes
 
-t2d_dag = HydeNet::setNode(t2d_dag, WC, nodeType = "dnorm", mu = paste0(0.821," * BMI + ",39.6 - 0.821*28.7), tau = 1/(15.6^2))
+t2d_dag = setNode(t2d_dag, WC, nodeType = "dnorm", mu = paste0(0.821," * BMI + ",39.6 - 0.821*28.7), tau = 1/(15.6^2))
 #intercept directly calculated in code, tau is the Gaussian distribution's precision. Precision = 1/variance = 1/(sd^2)
 
-t2d_dag = HydeNet::setNode(t2d_dag, SBP, nodeType = "dnorm", mu = paste0(0.148," * BMI + ",122 - .148*28.7), tau = 1/(14^2))
+t2d_dag = setNode(t2d_dag, SBP, nodeType = "dnorm", mu = paste0(0.148," * BMI + ",122 - .148*28.7), tau = 1/(14^2))
 #intercept directly calculated in code, tau = precision = 1/variance = 1/(sd^2)
 
-t2d_dag = HydeNet::setNode(t2d_dag, BMI, nodeType = "dnorm", mu = paste0(28.7), tau = 1/(5^2))
+t2d_dag = setNode(t2d_dag, BMI, nodeType = "dnorm", mu = paste0(28.7), tau = 1/(5^2))
 #BMI is an independent node, mean is directly input, tau = precision = 1/variance = 1/(sd^2)
 
 ####
@@ -58,8 +58,8 @@ qc_df = data.frame(measure = c("BMI mean", "BMI sd",
 qc_df
 
 #Below is the following code for running the use case's simulations in the paper####
-no_n = 1000000
-no_r = 500
+no_n = 10000
+no_r = 100
 
 #Scenario A, rs7903146's effect on body mass index
 
