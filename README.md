@@ -15,4 +15,4 @@ devtools::install_github("Lbreidenbach/McBias")
 
 =======
 
->>>>>>> 0a7f2874513c56e20368536d5433faf84ddc44b6
+
