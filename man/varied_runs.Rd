@@ -49,7 +49,7 @@ varied_runs(
 
 \item{match_methods}{Character value/vector. The method(s) in which distance between a matched case and control is measured as specified by MatchIt. Defaults to NULL which does no matching analysis.}
 
-\item{family}{Calls a more specific regression by passing the arguement into stats::glm() family argument}
+\item{family}{Calls a more specific regression by passing the argument into stats::glm() family argument}
 
 \item{...}{If the DAG has any unset variables, define them here}
 }

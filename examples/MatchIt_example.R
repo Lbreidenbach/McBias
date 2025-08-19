@@ -13,7 +13,11 @@ confounder_dag = setNode(confounder_dag, D, nodeType = "dbern", prob = paste0("i
 sim_data = create_data(confounder_dag, 10000)
 lm(B~C, sim_data)
 
-matched_data = matchit_matching("C", "A", sim_data, ratio = 6)
-lm(B~C, matched_data)
+if(length(find.package("MatchIt", quiet=TRUE))==1 ){
+  require(MatchIt)
+  matched_data = matchit_matching("C", "A", sim_data, ratio = 6)
+  lm(B~C, matched_data)
+}
+
 
 #Node A acts as a confounder in this example. We can see that the when "A" is adjusted on the relationship between "B" and "C" shifts towards 0.

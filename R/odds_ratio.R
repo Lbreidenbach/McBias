@@ -24,9 +24,9 @@
 #'@export
 #'
 
-odds_ratio = function(exposure, outcome, covariates=NULL, df){
+odds_ratio = function(exposure, outcome, covariates=NULL, df, family = "quasibinomial"){
   vars = c(exposure, covariates)
-  cont_glm = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, family = "quasibinomial")
+  cont_glm = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, family = family)
   exp_coef = as.numeric(cont_glm$coefficients[2])
   exp_or = exp(exp_coef)
   or_confint = stats::confint.default(cont_glm, parm = exposure, trace = F)

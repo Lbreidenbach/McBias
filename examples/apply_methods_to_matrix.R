@@ -16,9 +16,6 @@ sim_data = create_data(confounder_dag, 10000)
 or_result = odds_ratio(exposure = "A", outcome = "D", covariates = c("B","C"), df = sim_data)
 or_result
 
-rr_result = risk_ratio(exposure = "A", outcome = "D", covariates = c("B","C"), df = sim_data)
-rr_result
-
 #outcome must be continuous
 lm_results = lm_beta(exposure = "C", outcome = "B", covariates = "A", df = sim_data)
 lm_results
@@ -33,14 +30,20 @@ binary_outcome_result
 gaussian_outcome_result = apply_methods(exposure = "C", outcome = "B", covariates = "A", df = sim_data)
 gaussian_outcome_result
 
-#user can also input instructions for running MatchIt methods.
+#user can also input instructions for running MatchIt methods if the optional MatchIt Package is downloaded.
 #Note these are computationally intensive and may take a while to run especially for data with large N.
 #matching methods throw away unmatched controls/ duplicate controls to match to cases, This will be reflected in the n column
+if(length(find.package("MatchIt", quiet=TRUE))==1 ){
+  require(MatchIt)
+  matching_results = apply_methods(exposure = "C", outcome = "B", covariates = "A", df = sim_data, ratio = 2, match_methods = c("logit", "Mahalanobis"))
+  matching_results
+}
 
-matching_results = apply_methods(exposure = "C", outcome = "B", covariates = "A", df = sim_data, ratio = 2, match_methods = c("logit", "Mahalanobis"))
-matching_results
 
 #if a continuous exposure is fed into matching methods, the exposure will be dichotimized and a warning will be issued
+if(length(find.package("MatchIt", quiet=TRUE))==1 ){
+  require(MatchIt)
+  gaussian_exposure_results = apply_methods(exposure = "B", outcome = "A", covariates = "A", df = sim_data, ratio = 2, match_methods = c("logit", "Mahalanobis"))
+  gaussian_exposure_results
+}
 
-gaussian_exposure_results = apply_methods(exposure = "B", outcome = "A", covariates = "A", df = sim_data, ratio = 2, match_methods = c("logit", "Mahalanobis"))
-gaussian_exposure_results

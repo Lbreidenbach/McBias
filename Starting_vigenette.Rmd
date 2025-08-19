@@ -1,7 +1,7 @@
 ---
 title: "Getting started with McBias"
 author: "Ash Breidenbach"
-date: "2024-03-05"
+date: "2025-08-19"
 output: html_document
 ---
 ```{r,echo=FALSE, message=FALSE}
@@ -9,19 +9,21 @@ output: html_document
 library(McBias)
 library(ggplot2)
 library(grid)
+library(Rgraphviz) 
 
 data("vignette_data")
+data("vignette_data2")
 
 ```
 
 
-The library McBias simulates and analyzes datasets using a directed acyclic graph object (DAG object) that the user sets. This allows the user to create a dataset where all effect sizes are known. By analyzing the dataset in a biased way, the user can quantify how much the biased effect size drifts from the originally set effect size. 
+The library McBias simulates and analyzes datasets using a directed acyclic graph object (DAG object) that the user sets. This allows the user to create a dataset where all effect sizes and distributions are known. By analyzing the dataset in a biased way, the user can quantify how much the biased effect size drifts from the originally set effect size. 
 
 **Note: if only bernoulli or gaussian distributions are used to set nodes then the user can use the accompanying rshiny app which will write the lines of code below. In this case, skip to step 3**.
 
 ## Step 1 - Create a Directed Acyclic Graph (DAG)
 
-To begin we must set our DAG object. Our DAG object must not have bidirectional arrows or cycles. Each node in the DAG will correspond to a different column in the dataset. 
+To begin we must set our DAG object. Each node in the DAG will correspond to that variable's column in the simulated datasets. Each edge (arrow) sets which nodes influence others. Our DAG object must not have bidirectional arrows or cycles. Each node in the DAG will correspond to a different column in the dataset. 
 
 ```{r}
 
@@ -32,16 +34,18 @@ To begin we must set our DAG object. Our DAG object must not have bidirectional 
 my_dag = HydeNetwork(~B|A + C|A + D|B*C)
 
 ```
-This creates the following DAG       
+You can plot the following DAG with the Rgraphviz library if desired
 
+```{r}
+#my_dag$dag gives adjacency matrix for plotting DAG
+my_graph<-new(Class="graphAM", adjMat=my_dag$dag, edgemode="directed")
+plot(my_graph)
+```
 
-&nbsp;↙A↘   
-B &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C      
-&nbsp;↘D↙ 
 
 ## Step 2 - Add distributions to your DAG
 
-Once we've established a DAG, we must set each node's distribution. We can see all our node's distributions are currently unspecified.
+Once we've established a DAG, we must set each node's distribution and each edge's effect size.  We can see all our node's distributions are currently unspecified.
 ```{r}
 writeNetworkModel(my_dag, pretty = TRUE)
 ```
@@ -60,6 +64,7 @@ Each interaction between nodes must have a set effect size. For this example we'
 * **B** -> **D** is 0.05
 * **C** -> **D** is 1.2
 
+Setting effect sizes requires writing generalized linear models (GLMs) within the distribution. Below is example code that discloses how to write them. Our RShiny app can write the GLM code for you as long as all nodes distributions are Bernoulli or Gaussian. 
 
 ```{r, message=FALSE}
 #we can set the distributions of each node with the setNode() command from Hydenet
@@ -99,9 +104,10 @@ Now that a DAG object is set, simulations can began. create_data() allows a sing
 
 ```{r, results=FALSE}
 sim_df = create_data(my_dag, 10000)
+head(create_data(my_dag, 10000))
 
 ```
-```{r}
+```{r,echo=FALSE, message=FALSE}
 knitr::kable(head(sim_df))
 
 ```
@@ -112,15 +118,19 @@ We can check this created dataset to make sure our set distributions were set th
 
 *Note: Bernoulli nodes that are dependent on Gaussian nodes can sometimes skew positively or negatively as their probability approaches 0 or 1 respectively. In this case, if the probability is set near 0, the generated dataset's prevalence for the node can skew higher. If the probability is near 1 the simulated dataset's prevalence can skew lower.*
 
-```{r}
+```{r, results=FALSE}
 sum_df = data.frame("Node A prevalence" = sum(sim_df$A)/length(sim_df$A),
                     "Node B mean" = round(mean(sim_df$B), 4),
                     "Node C prevalence" = sum(sim_df$C)/length(sim_df$C),
                     "Node D prevalence" = sum(sim_df$D)/length(sim_df$D))
-
+sum_df
+```
+```{r,echo=FALSE, message=FALSE}
 knitr::kable(sum_df)
 
 ```
+
+This summary of one simulated dataset reflects the distributions we set.
 
 ## Step 4 - Analyze the simulations 
 
@@ -187,7 +197,11 @@ beta_summary() gives the following outputs:
 * **Mean B estimate** gives the mean of all the calculated effect sizes.
 * **B estimate std dev** gives the standard deviation of all the calculated effect sizes. Provides insight into changes in precision
 
-```{r}
+```{r, eval=FALSE}
+ideal_sim_summary = round(beta_summary(ideal, a = 0.05), 4)
+ideal_sim_summary 
+```
+```{r,echo=FALSE, message=FALSE}
 ideal_sim_summary = round(beta_summary(ideal, a = 0.05), 4)
 knitr::kable(ideal_sim_summary)
 ```
@@ -208,7 +222,7 @@ selection_bias = varied_runs(500, my_dag, "B", "C", sb = "D", n = 400000) #n is 
 adjust_all = varied_runs(500, my_dag, "B", "C", c("A", "D"), n = 100000)  
 ```
 
-###Step 5- compare multiple simulations to each other
+## Step 5- compare multiple simulations to each other
 
 To compare these datasets we can use reparse_runs(). You can use this to compare how different scenarios did. To use this, the following requirements must be met.
 
@@ -248,9 +262,76 @@ beta_summary() reports:
 * percent of beta estimates *over* the 95% confidence interval
 * percent of beta estimates *under* the 95% confidence interval
 
-```{r}
+```{r, eval=FALSE}
+combined_summary = round(beta_summary(combined_log_r), 4)
+combined_summary
+```
+```{r,echo=FALSE, message=FALSE}
 combined_summary = round(beta_summary(combined_log_r), 4)
 knitr::kable(combined_summary)
 ```
 
 We can verify here that significant bias is present in all non-ideal scenarios. We can see that the false positive rate for all non-ideal scenarios is higher because the bias caused the mean calculated effect estimate to shift away from 0. The non-ideal scenario with the next lowest bias, adjust_all, still has about 3 times the likelihood of rejecting the null that the ideal scenario does. 
+
+## Running Alternative Methods
+### Alternate regression methods
+
+If needed, specific types of regression can be set with the family argument.
+```{r, eval=FALSE}
+
+default_run = varied_runs(100, my_dag, "B", "C", "A", n = 10000) #default
+probit_run = varied_runs(100, my_dag, "B", "C", "A",  n = 10000, family = quasibinomial(link = "probit"))
+cloglog_run = varied_runs(100, my_dag, "B", "C", "A",  n = 10000, family = quasibinomial(link = "cloglog"))
+
+combined_regression = reparse_runs(list(default_run, probit_run, cloglog_run), method = "regression", list_names = c("Default",  "Probit", "cloglog"))
+
+ci_ridges(combined_regression)
+beta_summary(combined_regression)
+```
+```{r,echo=FALSE, message=FALSE}
+combined_regression = reparse_runs(list(default_run, probit_run, cloglog_run), method = "regression", list_names = c("Default",  "Probit", "cloglog"))
+
+ci_ridges(combined_regression)
+combined_summary = round(beta_summary(combined_regression), 4)
+knitr::kable(combined_summary)
+```
+McBias will default to a logistic regression for a binary outcome and a linear regression for a continuous outcome. Since we set our GLM for outcome node C with log odds ratio coefficients and the logit linker function, the default regression converges on the effect size estimate the best. Depending on the distributions you set for the outcome, a different regression type may converge better (ex. family = "poisson" for an outcome with a poisson distribution).
+
+### Matching methods through MatchIt
+Matching methods are also available if the MatchIt library is installed. Matching methods are more computationally demanding than regression, especially with higher sample sizes (typically n > 10000). Keep this in mind when when setting the number. Because of this, only nearest matching methods are available, though the user can set any distance method MatchIt offers with the match_methods argument. If the exposure is continuous data, the top 25% quartile will be marked as cases and the rest controls. Any unmatched data will be thrown from the set, the reduced sample size will be reported under the sample_population element in the output list
+```{r, eval=FALSE}
+
+matching_run1 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =1)
+
+head(matching_run1$sample_population,3)
+ci_ridges(matching_run1)
+beta_summary(matching_run1)
+```
+```{r,echo=FALSE, message=FALSE}
+knitr::kable(head(matching_run1$sample_population,3))
+ci_ridges(matching_run1)
+combined_summary = round(beta_summary(matching_run1), 4)
+knitr::kable(combined_summary)
+```
+
+Users can control the number of controls that are matched to cases with the ratio argument.  Matching methods do best with a binary exposure that has low prevalence. In this example, since exposure **B** was dichotimized for p=0.25, a ratio of 3 starts biasing results due to the reuse of controls being matched to the cases.
+```{r, eval=FALSE}
+
+matching_run1 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =1)
+matching_run2 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =2)
+matching_run3 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =3)
+
+tot_match = reparse_runs(list(matching_run1,matching_run2,matching_run3), "Mahalanobis", 
+                         c("1 case to 1 control", "1 case to 2 controls", "1 case to 3 controls"))
+head(tot_match$sample_population,3)
+ci_ridges(tot_match)
+beta_summary(tot_match)
+```
+```{r,echo=FALSE, message=FALSE}
+tot_match = reparse_runs(list(matching_run1,matching_run2,matching_run3), "Mahalanobis", 
+                         c("1 case to 1 control", "1 case to 2 controls", "1 case to 3 controls"))
+ci_ridges(tot_match)
+combined_summary = round(beta_summary(tot_match), 4)
+knitr::kable(combined_summary)
+```
+

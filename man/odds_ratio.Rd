@@ -4,7 +4,7 @@
 \alias{odds_ratio}
 \title{Analyzes a data frame to give an odds ratio}
 \usage{
-odds_ratio(exposure, outcome, covariates = NULL, df)
+odds_ratio(exposure, outcome, covariates = NULL, df, family = "quasibinomial")
 }
 \arguments{
 \item{exposure}{Character value. The name of a column in a data frame that represents exposure in an}
@@ -46,7 +46,7 @@ sim_data = create_data(confounder_dag, 10000)
 
 #outcome must be binary
 or_result = odds_ratio(exposure = "A", outcome = "D", covariates = c("B","C"), df = sim_data)
-rr_result = risk_ratio(exposure = "A", outcome = "D", covariates = c("B","C"), df = sim_data)
+
 
 #outcome must be continuous
 lm_results = lm_beta(exposure = "C", outcome = "B", covariates = "A", df = sim_data)

@@ -22,10 +22,16 @@
 
 
 matchit_matching = function(exposure, covariates, df, d = "logit", ratio = 1){
-  psm = matchit(as.formula(paste(exposure, paste(covariates, collapse=" + "), sep=" ~ ")), data = df, method = "nearest", distance = d, ratio = ratio)
-  treated_index = rownames(psm$match.matrix)
-  untreated_index = c(psm$match.matrix[1:length(psm$match.matrix)])
-  treated_subset = df[treated_index, ]
-  untreated_subset = df[untreated_index, ]
-  return(rbind(treated_subset, untreated_subset))
+  if(length(find.package("MatchIt", quiet=TRUE))!=1 ){
+    warning("Call to MatchIt without installation of MatchIt")
+  }else{
+    require(MatchIt)
+    psm = matchit(as.formula(paste(exposure, paste(covariates, collapse=" + "), sep=" ~ ")), data = df, method = "nearest", distance = d, ratio = ratio)
+    treated_index = rownames(psm$match.matrix)
+    untreated_index = c(psm$match.matrix[1:length(psm$match.matrix)])
+    treated_subset = df[treated_index, ]
+    untreated_subset = df[untreated_index, ]
+    return(rbind(treated_subset, untreated_subset))
+  }
+
 }

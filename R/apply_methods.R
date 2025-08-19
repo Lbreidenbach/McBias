@@ -28,7 +28,7 @@
 #' * number of samples in the dataset
 #'
 #'@example examples/apply_methods_to_matrix.R
-#'@seealso [varied_runs()], [lm_beta()], [odds_ratio()], [get_ps()], [matchit_matching()], [ps_weight()], [risk_ratio()]
+#'@seealso [varied_runs()], [lm_beta()], [odds_ratio()], [get_ps()], [matchit_matching()], [ps_weight()]
 #'@export
 #'
 
@@ -68,14 +68,9 @@ apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=
   }
   #rewriting for less if/else conditions
 
-  #risk_ratio_quals
-  # if(class(df[,outcome])=="integer" & length(find.package("logisticRR", quiet=TRUE))==1){
-  #   tot_df = tot_bind(list(tot_df, risk_ratio(exposure, outcome, covariates, df = df)))
-  # }
-
   #odds ratio quals
   if(class(df[,outcome])=="integer"){
-    tot_df = tot_bind(list(tot_df, odds_ratio(exposure, outcome, covariates, df = df)))
+    tot_df = tot_bind(list(tot_df, odds_ratio(exposure, outcome, covariates, df = df, family)))
   }
 
   #lm beta quals
@@ -95,6 +90,7 @@ apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=
   if(length(find.package("MatchIt", quiet=TRUE))!=1 & is.null(match_methods)==F){
     warning("You've entered matching methods without the MatchIt package installed. Matching Analyses have been skipped")
   }
+  require("MatchIt")
 
   if(is.null(match_methods)==F & length(find.package("MatchIt", quiet=TRUE))==1){
     di_df = df

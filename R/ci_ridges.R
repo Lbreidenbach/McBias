@@ -84,6 +84,7 @@ ci_ridges = function(run, title =NULL, subtitle=NULL){
   p <- ggplot2::ggplot(data, aes(x=value, y=names)) +
     ggridges::stat_density_ridges(scale = 0.95,
                         quantile_lines = TRUE,
+                        fill = "grey50",
                         quantile_fun = function(x, ...) quantile(x, probs =
                                                                    c(sort(c(mean(data[data$value == x,]$lower))), sort(c(mean(data[data$value == x,]$upper)))), na.rm = TRUE)
     ) +
@@ -176,7 +177,6 @@ ci_ridges = function(run, title =NULL, subtitle=NULL){
 
   # Get the ggplot grob for plot1
   g = ggplot2::ggplotGrob(r)
-  gtable_show_layout(g)
   # Get the position of the panel,
   # add a column to the right of the panel,
   # put the legend into that column,
