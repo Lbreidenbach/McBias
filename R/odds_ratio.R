@@ -26,7 +26,12 @@
 #'@export
 #'
 
-odds_ratio = function(exposure, outcome, covariates=NULL, df, family = "quasibinomial"){
+odds_ratio = function(exposure, outcome, covariates=NULL, df, family = NULL){
+  if(is.null(family)==TRUE){
+    family = quasibinomial
+  }else{
+    family = family
+  }
   vars = c(exposure, covariates)
   cont_glm = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, family = family)
   exp_coef = as.numeric(cont_glm$coefficients[2])

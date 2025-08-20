@@ -4,7 +4,7 @@
 \alias{lm_beta}
 \title{Analyzes a data frame to give an odds ratio}
 \usage{
-lm_beta(exposure, outcome, covariates = NULL, df, family = gaussian)
+lm_beta(exposure, outcome, covariates = NULL, df, family = NULL)
 }
 \arguments{
 \item{exposure}{Character value. The name of a column in a data frame that represents exposure in an}

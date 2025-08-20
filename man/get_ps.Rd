@@ -4,7 +4,7 @@
 \alias{get_ps}
 \title{Interfaces with the MatchIt package to create a matched dataset as specifed by the user}
 \usage{
-get_ps(exposure, covariates, df)
+get_ps(exposure, covariates, df, family = NULL)
 }
 \arguments{
 \item{exposure}{Character value. The name of the column in a data frame that represents the exposure}

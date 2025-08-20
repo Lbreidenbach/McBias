@@ -27,12 +27,23 @@
 #'@export
 #'
 
-ps_weight = function(exposure, outcome, covariates, df, weights){
+ps_weight = function(exposure, outcome, covariates, df, weights, family=NULL){
   vars = c(exposure, covariates)
   if(class(df[,outcome]) == "numeric" ){
-    cont_glm = stats::lm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, weights = weights)
+    if(is.null(family)==TRUE){
+      family = gaussian
+    }else{
+      family = family
+    }
+    cont_glm = stats::lm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, weights = weights, family = family)
   }else if(class(df[,outcome]) == "integer"){
-    cont_glm = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, weights = weights, family = "quasibinomial")
+    if(is.null(family)==TRUE){
+      family = quasibinomial
+    }else{
+      family = family
+    }
+
+    cont_glm = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, weights = weights, family = family)
   }else{
     warning("exposure must be numeric or integer")
   }

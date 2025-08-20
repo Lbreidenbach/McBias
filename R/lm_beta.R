@@ -26,7 +26,13 @@
 #'@export
 #'
 
-lm_beta = function(exposure, outcome, covariates=NULL, df, family = gaussian){
+lm_beta = function(exposure, outcome, covariates=NULL, df, family = NULL){
+  if(is.null(family)==TRUE){
+    family = gaussian
+  }else{
+    family = family
+  }
+
   vars = c(exposure, covariates)
   lm1 = stats::glm(as.formula(paste(outcome, paste(vars, collapse=" + "), sep=" ~ ")), data = df, family = family)
   confint = confint(lm1, parm = exposure, trace = F)

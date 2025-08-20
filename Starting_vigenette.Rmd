@@ -242,7 +242,7 @@ head(combined_log_r$calculated_ate)
 ```
 
 as we did before, you can use ci_ridges  for quick comparisons
-```{r, message=FALSE, warning=FALSE}
+```{r,echo = FALSE, message=FALSE, warning=FALSE}
 ci_ridges(combined_log_r)
 
 ```
@@ -279,23 +279,26 @@ We can verify here that significant bias is present in all non-ideal scenarios. 
 If needed, specific types of regression can be set with the family argument.
 ```{r, eval=FALSE}
 
-default_run = varied_runs(100, my_dag, "B", "C", "A", n = 10000) #default
-probit_run = varied_runs(100, my_dag, "B", "C", "A",  n = 10000, family = quasibinomial(link = "probit"))
-cloglog_run = varied_runs(100, my_dag, "B", "C", "A",  n = 10000, family = quasibinomial(link = "cloglog"))
+default_run = varied_runs(500, my_dag, "A","C", n = 10000, family = quasibinomial(link = "logit")) #default
+probit_run = varied_runs(500, my_dag,  "A","C",  n = 10000, family = quasibinomial(link = "probit"))
+cloglog_run = varied_runs(500, my_dag,  "A","C", n = 10000, family = quasibinomial(link = "cloglog"))
 
 combined_regression = reparse_runs(list(default_run, probit_run, cloglog_run), method = "regression", list_names = c("Default",  "Probit", "cloglog"))
 
 ci_ridges(combined_regression)
 beta_summary(combined_regression)
 ```
-```{r,echo=FALSE, message=FALSE}
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
 combined_regression = reparse_runs(list(default_run, probit_run, cloglog_run), method = "regression", list_names = c("Default",  "Probit", "cloglog"))
 
 ci_ridges(combined_regression)
 combined_summary = round(beta_summary(combined_regression), 4)
 knitr::kable(combined_summary)
 ```
-McBias will default to a logistic regression for a binary outcome and a linear regression for a continuous outcome. Since we set our GLM for outcome node C with log odds ratio coefficients and the logit linker function, the default regression converges on the effect size estimate the best. Depending on the distributions you set for the outcome, a different regression type may converge better (ex. family = "poisson" for an outcome with a poisson distribution).
+McBias will default to a logistic regression for a binary outcome and a linear regression for a continuous outcome. Since we set our GLM for outcome node C with log odds ratio coefficients and the logit linker function, the default logistic regression converges on the effect size estimate properly. Probit and cloglog do not fit properly to our simulated data so bias arises from an improper method being used. 
+
+Depending on the distributions you set for the outcome, a different regression type may needed (ex. family = "poisson" for an outcome with a poisson distribution). Certain regression types are incapable of analyzing certain outcome distributions. For example, trying to measure a gaussian outcome (like node B) with family = quasibinomial(link = "logit") results in an error. The default regression is always the proper regression for any GLMs created by RShiny.
+
 
 ### Matching methods through MatchIt
 Matching methods are also available if the MatchIt library is installed. Matching methods are more computationally demanding than regression, especially with higher sample sizes (typically n > 10000). Keep this in mind when when setting the number. Because of this, only nearest matching methods are available, though the user can set any distance method MatchIt offers with the match_methods argument. If the exposure is continuous data, the top 25% quartile will be marked as cases and the rest controls. Any unmatched data will be thrown from the set, the reduced sample size will be reported under the sample_population element in the output list
@@ -317,7 +320,7 @@ knitr::kable(combined_summary)
 Users can control the number of controls that are matched to cases with the ratio argument.  Matching methods do best with a binary exposure that has low prevalence. In this example, since exposure **B** was dichotimized for p=0.25, a ratio of 3 starts biasing results due to the reuse of controls being matched to the cases.
 ```{r, eval=FALSE}
 
-matching_run1 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =1)
+
 matching_run2 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =2)
 matching_run3 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =3)
 

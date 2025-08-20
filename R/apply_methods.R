@@ -34,7 +34,7 @@
 
 
 
-apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=1, match_methods = NULL, family = gaussian){
+apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=1, match_methods = NULL, family = NULL){
   re = function(df, name){
     rownames(df) = name
     return(df)
@@ -80,9 +80,9 @@ apply_methods = function(exposure, outcome, covariates=NULL, sb=NULL, df, ratio=
 
   #ps weighting quals
   if(is.null(covariates)==F){
-    ps_df = get_ps(exposure, covariates, df)
+    ps_df = get_ps(exposure, covariates, df, family)
     tot_df =  tot_bind(list(tot_df,
-                            ps_weight(exposure, outcome, covariates, ps_df, "weights")))
+                            ps_weight(exposure, outcome, covariates, ps_df, "weights", family)))
 
   }
 

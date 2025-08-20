@@ -12,7 +12,7 @@ apply_methods(
   df,
   ratio = 1,
   match_methods = NULL,
-  family = gaussian
+  family = NULL
 )
 }
 \arguments{

@@ -18,7 +18,7 @@ varied_runs(
   over_r = 0,
   ratio = 1,
   match_methods = NULL,
-  family = gaussian,
+  family = NULL,
   ...
 )
 }

@@ -54,7 +54,7 @@
 #'
 
 
-varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n=10000, positivity = F, misdiagnosis_v = outcome, under_r = 0, over_r = 0, ratio=1, match_methods = NULL, family = gaussian, ...){
+varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n=10000, positivity = F, misdiagnosis_v = outcome, under_r = 0, over_r = 0, ratio=1, match_methods = NULL, family = NULL, ...){
   randomize = function(variable, rmodel){
     if(is.null(variable) == TRUE){
       variable = rmodel
@@ -95,7 +95,7 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
 
   temp_df = mclapply(c(1:runs), function(x) misdiagnosis(temp_df[[x]], misdiagnosis_v, under_r[x], over_r[x]))
   cat("Analyzing simulated data...")
-  temp_output = mclapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods, family)
+  temp_output = mclapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods, family=family)
 
   one_dim = FALSE
   if(names(temp_output[[1]])[1]=="apply(tot_df, 2, unlist)"){

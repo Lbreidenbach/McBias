@@ -16,16 +16,28 @@
 #'@export
 #'
 
-get_ps = function(exposure, covariates, df){
+get_ps = function(exposure, covariates, df, family = NULL){
   if(class(df[,exposure]) == "numeric" ){
-    ps_mod = lm(as.formula(paste(exposure, paste(covariates, collapse=" + "), sep=" ~ ")), data = df)
+    if(is.null(family)==TRUE){
+      family = gaussian
+    }else{
+      family = family
+    }
+
+    ps_mod = lm(as.formula(paste(exposure, paste(covariates, collapse=" + "), sep=" ~ ")), data = df, family = family)
     ps = as.numeric(plogis(fitted.values(ps_mod)))
     num_mod = lm(as.formula(paste(exposure, 1, sep=" ~ ")), data = df)
     num = as.numeric(plogis(fitted.values(num_mod)))
   }else if(class(df[,exposure]) == "integer"){
-    ps_mod <- glm(as.formula(paste(exposure, paste(covariates, collapse=" + "), sep=" ~ ")), data = df, family="binomial")
+    if(is.null(family)==TRUE){
+      family = binomial
+    }else{
+      family = family
+    }
+
+    ps_mod <- glm(as.formula(paste(exposure, paste(covariates, collapse=" + "), sep=" ~ ")), data = df, family=family)
     ps = fitted(ps_mod)
-    num_mod = glm(as.formula(paste(exposure, 1, sep=" ~ ")), data = df, family = "binomial")
+    num_mod = glm(as.formula(paste(exposure, 1, sep=" ~ ")), data = df, family = family)
     num = fitted(num_mod)
   }else{
     print("exposure must be numeric or integer class")

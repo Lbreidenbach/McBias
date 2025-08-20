@@ -4,7 +4,7 @@
 \alias{odds_ratio}
 \title{Analyzes a data frame to give an odds ratio}
 \usage{
-odds_ratio(exposure, outcome, covariates = NULL, df, family = "quasibinomial")
+odds_ratio(exposure, outcome, covariates = NULL, df, family = NULL)
 }
 \arguments{
 \item{exposure}{Character value. The name of a column in a data frame that represents exposure in an}
@@ -14,6 +14,8 @@ odds_ratio(exposure, outcome, covariates = NULL, df, family = "quasibinomial")
 \item{covariates}{Character value/vector. The name(s) of the columns that the user wants adjust on.}
 
 \item{df}{The data frame for analysis}
+
+\item{family}{Calls a more specific regression by passing the argument into stats::glm() family argument}
 }
 \value{
 A six column data frame with the following summary statistics:

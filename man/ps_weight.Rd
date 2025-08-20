@@ -4,7 +4,7 @@
 \alias{ps_weight}
 \title{Analyzes a data frame to give an odds ratio}
 \usage{
-ps_weight(exposure, outcome, covariates, df, weights)
+ps_weight(exposure, outcome, covariates, df, weights, family = NULL)
 }
 \arguments{
 \item{exposure}{Character value. The name of a column in a data frame that represents exposure in an}
