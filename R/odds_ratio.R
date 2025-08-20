@@ -11,6 +11,8 @@
 #'
 #' @param df The data frame for analysis
 #'
+#' @param family Calls a more specific regression by passing the argument into stats::glm() family argument
+#'
 #' @return A six column data frame with the following summary statistics:
 #' * odds ratio
 #' * beta (log odds)
