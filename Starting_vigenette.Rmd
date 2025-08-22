@@ -317,25 +317,3 @@ ci_ridges(matching_run1)
 combined_summary = round(beta_summary(matching_run1), 4)
 knitr::kable(combined_summary)
 ```
-
-Users can control the number of controls that are matched to cases with the ratio argument.  
-```{r, eval=FALSE}
-
-
-matching_run2 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =2)
-
-
-tot_match = reparse_runs(list(matching_run1,matching_run2), "Mahalanobis", 
-                         c("1 case to 1 control", "1 case to 2 controls"))
-head(tot_match$sample_population,3)
-ci_ridges(tot_match)
-beta_summary(tot_match)
-```
-```{r,echo=FALSE, message=FALSE}
-tot_match = reparse_runs(list(matching_run1,matching_run2), "Mahalanobis", 
-                         c("1 case to 1 control", "1 case to 2 controls"))
-ci_ridges(tot_match)
-combined_summary = round(beta_summary(tot_match), 4)
-knitr::kable(combined_summary)
-```
-
