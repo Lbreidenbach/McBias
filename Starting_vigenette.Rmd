@@ -5,7 +5,8 @@ date: "2025-08-19"
 output: html_document
 ---
 ```{r,echo=FALSE, message=FALSE}
-
+devtools::load_all()
+devtools::document()
 library(McBias)
 library(ggplot2)
 library(grid)
@@ -242,8 +243,8 @@ head(combined_log_r$calculated_ate)
 ```
 
 as we did before, you can use ci_ridges  for quick comparisons
-```{r,echo = FALSE, message=FALSE, warning=FALSE}
-ci_ridges(combined_log_r)
+```{r,message=FALSE, warning=FALSE}
+ci_ridges(combined_log_r, title = "Bias from Different Adjustment Sets")
 
 ```
 
@@ -285,13 +286,13 @@ cloglog_run = varied_runs(500, my_dag,  "A","C", n = 10000, family = quasibinomi
 
 combined_regression = reparse_runs(list(default_run, probit_run, cloglog_run), method = "regression", list_names = c("Default",  "Probit", "cloglog"))
 
-ci_ridges(combined_regression)
+ci_ridges(combined_regression, title = "Bias from Improper Regression Fitting")
 beta_summary(combined_regression)
 ```
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 combined_regression = reparse_runs(list(default_run, probit_run, cloglog_run), method = "regression", list_names = c("Default",  "Probit", "cloglog"))
 
-ci_ridges(combined_regression)
+ci_ridges(combined_regression, title = "Bias from Improper Regression Fitting")
 combined_summary = round(beta_summary(combined_regression), 4)
 knitr::kable(combined_summary)
 ```
@@ -317,22 +318,22 @@ combined_summary = round(beta_summary(matching_run1), 4)
 knitr::kable(combined_summary)
 ```
 
-Users can control the number of controls that are matched to cases with the ratio argument.  Matching methods do best with a binary exposure that has low prevalence. In this example, since exposure **B** was dichotimized for p=0.25, a ratio of 3 starts biasing results due to the reuse of controls being matched to the cases.
+Users can control the number of controls that are matched to cases with the ratio argument.  
 ```{r, eval=FALSE}
 
 
 matching_run2 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =2)
-matching_run3 = varied_runs(500, my_dag, "B", "C", "A",  n = 10000, match_methods = c("Mahalanobis"), ratio =3)
 
-tot_match = reparse_runs(list(matching_run1,matching_run2,matching_run3), "Mahalanobis", 
-                         c("1 case to 1 control", "1 case to 2 controls", "1 case to 3 controls"))
+
+tot_match = reparse_runs(list(matching_run1,matching_run2), "Mahalanobis", 
+                         c("1 case to 1 control", "1 case to 2 controls"))
 head(tot_match$sample_population,3)
 ci_ridges(tot_match)
 beta_summary(tot_match)
 ```
 ```{r,echo=FALSE, message=FALSE}
-tot_match = reparse_runs(list(matching_run1,matching_run2,matching_run3), "Mahalanobis", 
-                         c("1 case to 1 control", "1 case to 2 controls", "1 case to 3 controls"))
+tot_match = reparse_runs(list(matching_run1,matching_run2), "Mahalanobis", 
+                         c("1 case to 1 control", "1 case to 2 controls"))
 ci_ridges(tot_match)
 combined_summary = round(beta_summary(tot_match), 4)
 knitr::kable(combined_summary)
