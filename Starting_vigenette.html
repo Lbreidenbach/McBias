@@ -363,10 +363,11 @@ user to create a dataset where all effect sizes and distributions are
 known. By analyzing the dataset in a biased way, the user can quantify
 how much the biased effect size drifts from the originally set effect
 size.</p>
-<p><strong>Note: if only bernoulli or gaussian distributions are used to
-set nodes then the user can use the accompanying rshiny app which will
-write the lines of code below. In this case, skip to step
-3</strong>.</p>
+<p><em>Note: if only bernoulli or gaussian distributions are used to set
+nodes then the user can use the accompanying RShiny app which will write
+the lines of code below. In this case, skip to step 3</em>.</p>
+<p><strong>You can access RShiny app url to write the code for steps 1
+and 2 <a href="https://mcbias.shinyapps.io/rshiny_bias/">here</a>.</strong></p>
 <div id="step-1---create-a-directed-acyclic-graph-dag" class="section level2">
 <h2>Step 1 - Create a Directed Acyclic Graph (DAG)</h2>
 <p>To begin we must set our DAG object. Each node in the DAG will
@@ -478,39 +479,39 @@ head(create_data(my_dag, 10000))</code></pre>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">-1.1108974</td>
+<td align="right">-0.6889359</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">-0.3741993</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">0.3441454</td>
 <td align="right">1</td>
 <td align="right">1</td>
 </tr>
 <tr class="even">
-<td align="right">1</td>
-<td align="right">-1.3159471</td>
+<td align="right">0</td>
+<td align="right">0.7089610</td>
 <td align="right">1</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">0.6102107</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="right">0</td>
-<td align="right">-0.1084944</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">-1.0595938</td>
+<td align="right">1.2240422</td>
 <td align="right">1</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
+<td align="right">0</td>
+<td align="right">-0.8319860</td>
 <td align="right">1</td>
-<td align="right">1.1253398</td>
-<td align="right">1</td>
-<td align="right">1</td>
+<td align="right">0</td>
 </tr>
 </tbody>
 </table>
@@ -538,10 +539,10 @@ sum_df</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">0.5014</td>
-<td align="right">0.0092</td>
-<td align="right">0.8924</td>
-<td align="right">0.2548</td>
+<td align="right">0.4978</td>
+<td align="right">0.0036</td>
+<td align="right">0.8961</td>
+<td align="right">0.2537</td>
 </tr>
 </tbody>
 </table>

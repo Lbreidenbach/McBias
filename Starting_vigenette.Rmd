@@ -20,7 +20,9 @@ data("vignette_data2")
 
 The library McBias simulates and analyzes datasets using a directed acyclic graph object (DAG object) that the user sets. This allows the user to create a dataset where all effect sizes and distributions are known. By analyzing the dataset in a biased way, the user can quantify how much the biased effect size drifts from the originally set effect size. 
 
-**Note: if only bernoulli or gaussian distributions are used to set nodes then the user can use the accompanying rshiny app which will write the lines of code below. In this case, skip to step 3**.
+*Note: if only bernoulli or gaussian distributions are used to set nodes then the user can use the accompanying RShiny app which will write the lines of code below. In this case, skip to step 3*.
+
+**You can access RShiny app url to write the code for steps 1 and 2 [here](https://mcbias.shinyapps.io/rshiny_bias/).**
 
 ## Step 1 - Create a Directed Acyclic Graph (DAG)
 
