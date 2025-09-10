@@ -79,6 +79,7 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
   outcome_eq = unlist(strsplit(outcome_eq, ")", fixed = T))
   outcome_eq = unlist(strsplit(outcome_eq, "(", fixed = T))
   outcome_eq = unlist(strsplit(outcome_eq, "+", fixed = T))
+  outcome_eq = grep("*", outcome_eq, value = T, fixed = T)
   outcome_val = grep(exposure, outcome_eq, value = T)
   outcome_val = gsub(exposure, 1, outcome_val)
   outcome_val = gsub("[[:alpha:]]", "0", outcome_val)
