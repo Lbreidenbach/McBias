@@ -1,6 +1,8 @@
 #' @noRd
 
-make_model = function(dag, ...){
+make_model = function(dag,
+                      seed = NULL,
+                      .RNG.name = "base::Mersenne-Twister", ...){
   arg_list = list(...)
   if(class(dag)== "HydeNetwork"){
     dag_1 = dag
@@ -12,6 +14,11 @@ make_model = function(dag, ...){
   }
 
   #writeNetworkModel(dag_1, pretty = TRUE)
-  comp_dag = compileJagsModel(dag_1)
+  if(is.null(seed)){
+    comp_dag = compileJagsModel(dag_1)
+  }else{
+    comp_dag = compileJagsModel(dag_1,inits=list(.RNG.name=.RNG.name, .RNG.seed=seed))
+  }
+
   return(comp_dag)
 }

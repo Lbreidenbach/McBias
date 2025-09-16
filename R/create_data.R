@@ -6,7 +6,14 @@
 #'
 #' @param n Integer, the number of samples in the simulated data frame
 #'
-#' @param positivity logical. If set to TRUE, checks for positivity violations among binary columns. If violated, it changes the value in the first row of the column to comply with positivity. Defaults to FALSE.
+#' @param seed Integer, set a seed for the simulated data frame
+#'
+#' @param positivity logical. If set to TRUE, checks for positivity violations among binary columns.
+#' If violated, it changes the value in the first row of the column to comply with positivity. Defaults to FALSE.
+#'
+#' @param .RNG.name Character value, specifies the random number generation (RNG) model for the seed.
+#' The available choices are “base::Wichmann-Hill”, “base::Marsaglia-Multicarry”, “base::Super-Duper”, and “base::Mersenne-Twister”.
+#' Defaults to “base::Mersenne-Twister”, which is also the default RNG model for R.
 #'
 #' @param ... if variables are written into the DAG object, they must all be numerically set here.
 #' This allows the user to quickly change DAG values when generating simulated data
@@ -18,10 +25,15 @@
 #'@export
 #'
 
-create_data = function(dag, n, positivity = F, ...){
+create_data = function(dag,
+                       n,
+                       seed=NULL,
+                       positivity = F,
+                       .RNG.name = "base::Mersenne-Twister",
+                       ...){
   reclassify = as.integer
-  jag_dag = make_model(dag, ...)
-  sim_df = bindSim(HydeSim(jag_dag, variable.names = colnames(jag_dag$dag), n.iter = n, bind = FALSE))
+  jag_dag = make_model(dag, seed, .RNG.name,...)
+  sim_df = bindSim(HydeSim(jag_dag, variable.names = colnames(jag_dag$dag), n.iter = n, bind = FALSE)) #written to create data.frame object in R
   sim_df = sim_df[c(-length(sim_df), -(length(sim_df)-1))]
 
   relabel = lapply(sim_df, check_integer) # JAGS labels integers as numeric, have to reclassify them
@@ -31,7 +43,8 @@ create_data = function(dag, n, positivity = F, ...){
 
   sep_check = length(which(duplicated(t(sim_df))==TRUE))
   if(sep_check != 0){
-    stop("complete separation occured (one variable completly predicts another). A beta value may be too large, or a sample size may be too small")
+    stop("complete separation occured (one variable completly predicts another).\n
+         A beta value may be too large, or the simulated dataset may be too small for proper analysis")
   }
   if(positivity==T){
     binary_cols = names(which(lapply(sim_df, is.integer)==TRUE))

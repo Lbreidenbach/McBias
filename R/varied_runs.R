@@ -54,7 +54,25 @@
 #'
 
 
-varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n=10000, positivity = F, misdiagnosis_v = outcome, under_r = 0, over_r = 0, ratio=1, match_methods = NULL, family = NULL, ...){
+varied_runs = function(runs,
+                       dag,
+                       exposure,
+                       outcome,
+                       covariates=NULL,
+                       sb=NULL,
+                       n=10000,
+                       seed = NULL,
+                       .RNG.name = "base::Mersenne-Twister",
+                       positivity = F,
+                       misdiagnosis_v = outcome,
+                       under_r = 0,
+                       over_r = 0,
+                       ratio=1,
+                       match_methods = NULL,
+                       family = NULL,
+                       ...){
+
+  #in progress for adding sensitivity analysis to varied runs
   randomize = function(variable, rmodel){
     if(is.null(variable) == TRUE){
       variable = rmodel
@@ -66,6 +84,15 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
   n = randomize(n, as.integer(runif(runs, 1000, 100000)))
   under_r = randomize(under_r, runif(runs, 0, 1))
   over_r = randomize(over_r, runif(runs, 0, 1))
+
+  #streamline seeds
+  if(is.null(seed)){
+    seeds=NULL
+  }else{
+    set.seed(seed)
+    seeds = sample(.Machine$integer.max, runs, replace = FALSE)
+  }
+
 
   value_df = data.frame(n = n,
                         under_r = under_r,
@@ -91,11 +118,19 @@ varied_runs = function(runs, dag, exposure, outcome, covariates=NULL, sb=NULL, n
   #
   cat("Creating simulated data...\n")
   sink(nullfile())    # suppress output
-  temp_df = lapply(c(1:runs), function(x) create_data(dag, value_df[x,1], positivity = positivity, ...))
+  # if(is.null(seed)){
+  #   temp_df = lapply(c(1:runs), function(x) create_data(dag, value_df[x,1], seed = NULL,positivity = positivity, .RNG.name = .RNG.name,...))
+  #
+  # }else{
+  #   temp_df = lapply(c(1:runs), function(x) create_data(dag, value_df[x,1], seed = value_df[x,4],positivity = positivity, .RNG.name = .RNG.name,...))
+  #
+  # }
+  temp_df = lapply(c(1:runs), function(x) create_data(dag, value_df[x,1], seed = seeds[x],positivity = positivity, .RNG.name = .RNG.name,...))
+
   sink()
 
   temp_df = mclapply(c(1:runs), function(x) misdiagnosis(temp_df[[x]], misdiagnosis_v, under_r[x], over_r[x]))
-  cat("Analyzing simulated data...")
+  cat("Analyzing simulated data...\n")
   temp_output = mclapply(temp_df, apply_methods, exposure = exposure, outcome = outcome, covariates = covariates, sb = sb, ratio=ratio, match_methods=match_methods, family=family)
 
   one_dim = FALSE
