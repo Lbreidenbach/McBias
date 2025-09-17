@@ -20,7 +20,7 @@ data("vignette_data2")
 
 The library McBias simulates and analyzes datasets using a directed acyclic graph object (DAG object) that the user sets. This allows the user to create a dataset where all effect sizes and distributions are known. By analyzing the dataset in a biased way, the user can quantify how much the biased effect size drifts from the originally set effect size. 
 
-*Note: if only bernoulli or gaussian distributions are used to set nodes then the user can use the accompanying RShiny app which will write the lines of code below. In this case, skip to step 3*.
+*Note: if only bernoulli or gaussian distributions are used to set nodes then the user can use the accompanying RShiny app which will write the lines of code below. In this case, skip to step 3.*
 
 **You can access RShiny app url to write the code for steps 1 and 2 [here](https://mcbias.shinyapps.io/rshiny_bias/).**
 
@@ -74,7 +74,7 @@ Each interaction between nodes must have a set effect size. For this example we'
 * **B** -> **D** is 0.05
 * **C** -> **D** is 1.2
 
-Setting effect sizes requires writing generalized linear models (GLMs) within the distribution within `setNode()`. First we can look up information about available distributions by referencing the `jagsDists` dataframe.
+Setting effect sizes requires writing generalized linear models (GLMs) for the distribution within `setNode()`. First we can look up information about available distributions by referencing the `jagsDists` dataframe.
 ```{r, eval=FALSE}
 jagsDists[jagsDists$DistName == "Bernoulli",]
 jagsDists[jagsDists$DistName == "Normal",]
@@ -94,7 +94,7 @@ Below is example code that discloses how to write them. The distributions corres
 my_dag <- setNode(network = my_dag, 
                  node = A, 
                  nodeType = "dbern", 
-                 prob = 0.5)
+                 p = 0.5)
 
 #Node B is gaussian, so it's nodeType is set to "dnorm". It is dependent on node A so its mean changes depending on if a 1 or 0 is chosen for node A during the simulation. Since the effect size of A -> B is 0.2, we multiply that 1 or 0 by 0.2. Thus, to set node B's overall mean we take the mean, 0, and subtract it by the product of node A's probability and effect size (0 - 0.2 * 0.5).
 
@@ -113,7 +113,7 @@ my_dag <- setNode(network = my_dag,
 my_dag <- setNode(network = my_dag, 
                   node = C, 
                   nodeType = "dbern", 
-                  prob = paste0("ilogit(",0.8," * A + ",set_p(0.9, 0.8*0.5),")")
+                  p = paste0("ilogit(",0.8," * A + ",set_p(0.9, 0.8*0.5),")")
                   )
 
 #Node D is also a dependent binary variable, so it is set similarly to node C. Note that node B's product of its effect size and mean is added to the product of node C's effect size and probability. I wrote out node B's product in set_p() for illustrative effect, even though in this case it is unnecessary because node B's product = 0
@@ -121,7 +121,7 @@ my_dag <- setNode(network = my_dag,
 my_dag <- setNode(network = my_dag,
                  node = D,
                  nodeType = "dbern", 
-                 prob = paste0("ilogit(",0.05," * B + ", 1.2," * C + ",set_p(0.25, 1.2 * 0.9 + 0.05 * 0 ),")")
+                 p = paste0("ilogit(",0.05," * B + ", 1.2," * C + ",set_p(0.25, 1.2 * 0.9 + 0.05 * 0 ),")")
                  )
 ```
 
@@ -134,10 +134,14 @@ writeNetworkModel(my_dag, pretty = TRUE)
 
 ## Step 3 - create simulations from the DAG
 
-Now that a DAG object is set, simulations can began. `create_data()` allows a single dataset to be generated. Binary nodes are portrayed as 0 or 1 integers
+Now that a DAG object is set, simulations can began. `create_data()` allows a single dataset to be generated. Binary nodes are portrayed as 0 or 1 integers. McBias runs its simulations inside the JAGS software. If you need to reproduce simulations, the seed **must** be set inside `create_data()` as shown. **The `set.seed()` function in R will not create reproducible datasets.**
 
 ```{r, results=FALSE}
-sim_df <- create_data(my_dag, 10000, seed=137)
+sim_df <- create_data(my_dag, 
+                      10000, 
+                      seed=137 #seed MUST be set inside the create_data() function 
+                      )
+
 head(sim_df, 5)
 
 ```
@@ -168,7 +172,44 @@ This summary of one simulated dataset reflects the distributions we set.
 
 ## Step 4 - Analyze the simulations 
 
-Now that we have a working DAG object (my_dag) we can start to analyze it in various ways.  `varied_runs()` generates multiple datasets and analyzes them as specified. It returns a list with 11 elements, with each element corresponding to a different summary statistic as shown below:
+Now that we have a working DAG object (my_dag) we can start to analyze it in various ways.  `varied_runs()` generates multiple datasets and analyzes them as specified. It returns the summary statistics of each analysis.
+
+Varied runs can analyze the dataset with various methods as set by the user. If this is the case, it will return summary statistics for method used. The default methods run are outlined below:
+
+**If the outcome is Bernoulli**: A logistic regression is run and results are under the "regression" column. If there are covariates to adjust for, propensity score weighting is also run and results are under the "ps_weighting" column.
+
+**If the outcome is Gaussian**: a linear regression is run and results are under the "regression" column. If there are covariates to adjust for, propensity score weighting is also run and results are under the "ps_weighting" column.
+
+The user also has the option of installing matchit and running matchit analyses, as shown in the running alternative methods section.
+
+We'll fill in the arguments below:
+
+* **runs** = 500
+    + 500 datasets will be created and analyzed
+* **dag** = my_dag
+    + must be a DAG object
+* **exposure** = "B"
+* **outcome** = "C"
+    + the datasets will be analyzed to find B's effect size on C
+* **covariates** = "A"
+    + A will be adjusted on
+* **n** = 100000
+    + each dataset will have 100000 samples
+* **seed** = 46
+    + A positive integer we can set to get reproducible results 
+  
+```{r, eval=FALSE}
+ideal <- varied_runs(runs = 500,
+                    dag = my_dag, 
+                    exposure = "B", 
+                    outcome = "C", 
+                    covariates = "A", 
+                    n = 100000,
+                    seed = 46 #for seed to properly pass to JAGS it must be set within varied_runs
+                    )
+```
+
+It returns a list with 11 elements, with each element corresponding to a different summary statistic as shown below:
 
 1. **ratio** Odds/risk ratio if applicable (will return NAs if not)
 2. **calculated_ate** estimated effect size/ estimated average treatment effect (ATE)
@@ -184,45 +225,13 @@ Now that we have a working DAG object (my_dag) we can start to analyze it in var
 10. **over_r** the set overdiagnosis rate, if set (will return 0s if not)
 11. **under_r** the set underdiagnosis rate, if set (will return 0s if not)
 
-Varied runs can analyze the dataset with various methods as set by the user. if this is the case, it will return those 11 summary statistics for method used. The methods run are bulleted below:
-
-**If the outcome is Bernoulli**: "logistic_regression* is run. "ps_weighting" or propensity score weighting is also run if there are covariates.
-
-**If the outcome is Gaussian**: "linear_regression" is run. "ps_weighting" or propensity score weighting is also run if there are covariates.
-
-The user also has the option of installing matchit and running matchit analyses, these are included with the other methods if set. Only greedy matching methods are available at this time.
-
-We'll fill in the arguments below:
-
-* **runs** = 500
-    + 500 datasets will be created and analyzed
-* **dag** = my_dag
-    + must be a DAG object
-* **exposure** = "B"
-* **outcome** = "C"
-* **covariates** = "A"
-    + A will be adjusted on
-* **n** = 100000
-    + each dataset will have 100000 samples
-  
-```{r, eval=FALSE}
-ideal <- varied_runs(runs = 500,
-                    dag = my_dag, 
-                    exposure = "B", 
-                    outcome = "C", 
-                    covariates = "A", 
-                    n = 100000,
-                    seed = 46 #for seed to properly pass to JAGS it must be set within varied runs
-                    )
-```
-
 The run results are saved as a list of 11. We can splice the results to look at any summary statistic we're interested in.
 
 ```{r}
 head(ideal$calculated_ate)
 ```
 
-We can visually compare how the methods compared to each other by using `ci_ridges()`.
+We can visually compare the methods to each other by using `ci_ridges()`.
 
 ```{r, message=FALSE, warning=FALSE}
 ci_ridges(ideal)
@@ -250,11 +259,15 @@ So here we can see that when node **A** is adjusted we get a mean effect size es
 
 **ideal** was the proper analysis. The collider **D** was not adjusted, and the confounder **A** was. The summary of ideal's simulation reflects this. The difference between the mean of the calculated effect sizes and the true effect size is near 0. We also see that the rejection rate approximately equals the alpha value, which we set at 0.05. Coverage also approximately equals 95%. Overall this means that when everything is adjusted properly one gets results with very little bias, and the true effect size approximately equals the calculated effect size.
 
+## Step 5- compare multiple simulations to each other
+
 What if the ideal couldn't be obtained? Suppose we didn't know to adjust for **A** or were given a dataset that was stratified on **D**? We can simulate the following scenarios to estimate how much bias different scenarios like these would cause.
 
 * **naive**: the dataset isn't adjusted in anyway. Here we expect to see confounder bias from node **A**
 * **selection_bias**: we assume that node **D** represents entry into the study. We will cut samples from the dataset where **D** = 0 and then analyze them. 
-* **adjust_all**: we adjust on both **A** and **D** 
+* **adjust_all**: we adjust on both **A** and **D**. Adjusting on A removes its confounding, but adjusting on D creates collider bias. This demonstrates that adjusting for every available covariate may create bias.
+
+Keeping the seed consistent across these runs ensures that the simulated datasets will be the same across the different scenarios, provided that the number of runs and number of samples are also kept the same.
 
 ```{r, eval=FALSE}
 naive <- varied_runs(runs = 500, 
@@ -263,13 +276,14 @@ naive <- varied_runs(runs = 500,
                     outcome = "C",
                     n = 100000,
                     seed = 46)
+
 selection_bias <- varied_runs(runs = 500,
                              dag = my_dag, 
                              exposure = "B", 
                              outcome = "C",
                              sb = "D",
                              n = 400000,
-                             seed = 46) #n is larger here. D has a prevalence of 0.25 and only samples with D will make it to the cut dataset that is analyzed. If we want n to be similar to the runs we are comparing it too, we'll have to multiply n * 1/p 
+                             seed = 46) #n is larger here. D has a prevalence of 0.25 and only samples with D will make it to the cut dataset that is analyzed. If we want n to be similar in power to the runs we are comparing it too, we'll have to multiply n * 1/p. Keep in mind that only the first 100000 generated samples will be identical to those in the other scenarios.
 
 adjust_all <- varied_runs(runs = 500, 
                          dag = my_dag, 
@@ -280,14 +294,13 @@ adjust_all <- varied_runs(runs = 500,
                          seed = 46)  
 ```
 
-## Step 5- compare multiple simulations to each other
 
-To compare these datasets we can use `reparse_runs()`. You can use this to compare how different scenarios did. To use this, the following requirements must be met.
+To compare these datasets with `ci_ridges()` and `beta_summary()` we can use `reparse_runs()`. You can use this to compare how different scenarios did. To use this, the following requirements must be met.
 
-* All scenarios must have the same number of iterations for varied_runs, in this example all scenarios have 500 iterations
-* The DAG object, exposure, and outcome must remain the same across all scenarios
+* All scenarios must have the same number of runs from `varied_runs()`. In this example all scenarios have 500 runs.
+* The DAG object, exposure, and outcome must remain the same across all scenarios.
 
-For this example, we'll compare the "logistic regression" method results of each scenario, so method = "logistic_regression".
+For this example, we'll compare the "regression" method results of each scenario, so method = "regression".
 ```{r}
 run_list <- list(ideal, 
                 naive, 
@@ -300,13 +313,14 @@ combined_log_r <- reparse_runs(run_list,
                               )
 ```
 
-You can see in combined_log_r that the methods have been switched out for the different scenarios, with each run's logistic_regression results used.
+You can see in combined_log_r that the methods have been switched out for the different scenarios, with each run's regression results used.
 
 ```{r}
 head(combined_log_r$calculated_ate)
 ```
 
-as we did before, you can use ci_ridges  for quick comparisons
+As we did before, we can use `ci_ridges()` for comparisons.
+
 ```{r,message=FALSE, warning=FALSE}
 ci_ridges(combined_log_r, title = "Bias from Different Adjustment Sets")
 
@@ -314,18 +328,7 @@ ci_ridges(combined_log_r, title = "Bias from Different Adjustment Sets")
 
 As we can see, the other non-ideal scenarios show signs of bias. 
 
-To make further calculations and measurements we can use `beta_summary()`. 
-`beta_summary()` reports: 
-* bias (difference between the mean beta estimate and the true beta)
-* the percentage of p values rejected at the set alpha value (default is a = 0.05)
-* B estimate mean squared error (MSE)
-* empirical standard error (for model verification)
-* model standard error (for model verification)
-* Relative % error in model standard error
-* mean of beta estimates
-* standard deviation of beta estimates
-* percent of beta estimates *over* the 95% confidence interval
-* percent of beta estimates *under* the 95% confidence interval
+We can also use `beta_summary()` as we did before. 
 
 ```{r, eval=FALSE}
 combined_summary = round(beta_summary(combined_log_r), 4)
@@ -336,7 +339,7 @@ combined_summary = round(beta_summary(combined_log_r), 4)
 knitr::kable(combined_summary)
 ```
 
-We can verify here that significant bias is present in all non-ideal scenarios. We can see that the false positive rate for all non-ideal scenarios is higher because the bias caused the mean calculated effect estimate to shift away from 0. The non-ideal scenario with the next lowest bias, adjust_all, still has about 3 times the likelihood of rejecting the null that the ideal scenario does. 
+All non-ideal scenarios have bias to the extent that coverage is no longer around 95%. When measuring bias it's important to consider which impacts of it matter in your research study. We can see that the null rejection rate for all non-ideal scenarios are higher because the bias caused the **mean b estimate** to shift away from 0. The non-ideal scenario with the next lowest bias, adjust_all, still has a null **rejection rate** twice that of the ideal scenario's. 
 
 ## Running Alternative Methods
 ### Alternate regression methods
@@ -391,7 +394,7 @@ Depending on the distributions you set for the outcome, a different regression t
 
 
 ### Matching methods through MatchIt
-Matching methods are also available if the MatchIt library is installed. Matching methods are more computationally demanding than regression, especially with higher sample sizes (typically n > 10000). Keep this in mind when when setting the number. Because of this, only nearest matching methods are available, though the user can set any distance method MatchIt offers with the match_methods argument. If the exposure is continuous data, the top 25% quartile will be marked as cases and the rest controls. Any unmatched data will be thrown from the set, the reduced sample size will be reported under the sample_population element in the output list
+Matching methods are also available if the MatchIt library is installed. Matching methods are more computationally demanding than regression, especially with higher sample sizes (typically n > 10000). Keep this in mind when when setting the number. Users can set any distance method MatchIt offers with the match_methods argument. If the exposure is continuous data, the top 25% quartile will be marked as cases and the rest controls. Any unmatched data will be thrown from the set, the reduced sample size will be reported under the sample_population element in the output list.
 ```{r, eval=FALSE}
 
 matching_run1 <- varied_runs(runs = 500, 
@@ -414,3 +417,5 @@ ci_ridges(matching_run1)
 combined_summary = round(beta_summary(matching_run1), 4)
 knitr::kable(combined_summary)
 ```
+
+Here we observe that the matching method is less precise than the weighting or regression methods, as its **B estimate std dev** is larger. This is due in part to the reduced sample size from throwing out the unmatched cases. 
