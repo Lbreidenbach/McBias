@@ -21,7 +21,7 @@ if (!require("devtools", quietly = TRUE))
     
 devtools::install_github("Lbreidenbach/McBias")
 ```
-
+https://html-preview.github.io/?url=https://github.com/Lbreidenbach/McBias/blob/main/Starting_vignette.html
 
 =======
 
